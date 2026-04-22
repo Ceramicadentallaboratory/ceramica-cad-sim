@@ -489,15 +489,17 @@ details.advanced[open] summary {
         <div class="desc">下ゾーン（セメント間隙）と上ゾーン（追加のセメント間隙）の境界位置</div>
       </div>
 
-      <h2 style="margin-top:14px;">📐 エマージェンシー形態</h2>
+      <div id="emergenceSection">
+        <h2 style="margin-top:14px;">📐 エマージェンシー形態</h2>
 
-      <div class="slider-row" data-param="emergenceAngle">
-        <div class="label-row">
-          <span class="label">エマージェンス角度</span>
-          <span class="value"><span id="v-emergenceAngle">35</span><span class="unit">°</span></span>
+        <div class="slider-row" data-param="emergenceAngle">
+          <div class="label-row">
+            <span class="label">エマージェンス角度</span>
+            <span class="value"><span id="v-emergenceAngle">35</span><span class="unit">°</span></span>
+          </div>
+          <input type="range" id="emergenceAngle" min="15" max="50" step="1" value="35">
+          <div class="desc"><span class="tight">小さい＝緩やか</span>（軟組織優しい） / <span class="loose">大きい＝急峻</span>（プラーク停滞リスク↑）</div>
         </div>
-        <input type="range" id="emergenceAngle" min="15" max="50" step="1" value="35">
-        <div class="desc"><span class="tight">小さい＝緩やか</span>（軟組織優しい） / <span class="loose">大きい＝急峻</span>（プラーク停滞リスク↑）</div>
       </div>
 
       <h2 style="margin-top:14px;">🔧 接触</h2>
@@ -809,6 +811,10 @@ function applyMode(mode) {
     const row = document.querySelector(`.slider-row[data-param="${param}"]`);
     if (row) row.classList.add('hidden-mode');
   });
+
+  // Emergence section only shown in implant mode
+  const emSection = document.getElementById('emergenceSection');
+  if (emSection) emSection.style.display = (mode === 'implant') ? '' : 'none';
 
   // Update active tab button
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1403,10 +1409,10 @@ document.getElementById('btnSave').addEventListener('click', () => {
   追加のセメント間隙      ${formatValue('extraCementGap', state.extraCementGap)} mm
   マージンラインまでの距離 ${formatValue('marginDistance', state.marginDistance)} mm
 
-【エマージェンシー形態】
+${currentMode === 'implant' ? `【エマージェンシー形態】
   エマージェンス角度      ${formatValue('emergenceAngle', state.emergenceAngle)} °
 
-【接触】
+` : ''}【接触】
   対合歯までの所望距離     ${formatValue('antagonistDistance', state.antagonistDistance)} mm
   隣在歯までの所望距離     ${formatValue('adjacentDistance', state.adjacentDistance)} mm`;
   output.textContent = text;
