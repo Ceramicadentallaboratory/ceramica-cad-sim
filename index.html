@@ -524,7 +524,7 @@ details.advanced[open] summary {
 
       <div class="actions">
         <button class="btn btn-secondary" id="btnReset">デフォルトに戻す</button>
-        <button class="btn btn-primary" id="btnSave">プリセット保存</button>
+        <button class="btn btn-primary" id="btnSend">📋 コピーしてラボに送る</button>
       </div>
 
       <pre class="preset-output" id="presetOutput"></pre>
@@ -1398,11 +1398,12 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => applyMode(btn.dataset.mode));
 });
 
-// Save button
-document.getElementById('btnSave').addEventListener('click', () => {
+// Send button — copies preset text to clipboard for pasting into LINE/email
+document.getElementById('btnSend').addEventListener('click', async () => {
   const output = document.getElementById('presetOutput');
+  const btn = document.getElementById('btnSend');
   const timestamp = new Date().toLocaleString('ja-JP');
-  const text = `Ceramica CADプリセット — ${MODE_INFO[currentMode].title}（${timestamp}保存）
+  const text = `Ceramica CADプリセット — ${MODE_INFO[currentMode].title}（${timestamp}）
 ──────────────────────────
 【ダイインターフェース】
   セメント間隙            ${formatValue('cementGap', state.cementGap)} mm
@@ -1414,16 +1415,40 @@ ${currentMode === 'implant' ? `【エマージェンシー形態】
 
 ` : ''}【接触】
   対合歯までの所望距離     ${formatValue('antagonistDistance', state.antagonistDistance)} mm
-  隣在歯までの所望距離     ${formatValue('adjacentDistance', state.adjacentDistance)} mm`;
+  隣在歯までの所望距離     ${formatValue('adjacentDistance', state.adjacentDistance)} mm
+
+── このテキストをLINEでセラミカまでお送りください。`;
+
   output.textContent = text;
   output.classList.add('show');
 
-  // Copy to clipboard
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => {
-      // optional: show toast
-    });
+  // Copy to clipboard; fall back to selecting text for manual copy if unavailable
+  let copied = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    }
+  } catch (e) {
+    console.warn('Clipboard write failed:', e);
   }
+  if (!copied) {
+    // Fallback: select the output text so user can Cmd/Ctrl+C manually
+    const range = document.createRange();
+    range.selectNodeContents(output);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  // Temporary button feedback
+  const originalText = btn.textContent;
+  btn.textContent = copied ? '✅ コピー完了！LINEに貼ってください' : '📋 選択済み・Cmd+Cでコピー';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }, 2500);
 });
 
 // Load per-clinic preset from /clinics/<slug>.json when ?clinic=<slug> is present.
