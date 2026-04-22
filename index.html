@@ -597,6 +597,28 @@ details.advanced[open] summary {
           <!-- Prepared tooth (inner stump) -->
           <path id="prepTooth" d="" fill="url(#metalGrad)" stroke="#334155" stroke-width="1.5"/>
 
+          <!-- Implant group (shown only in implant mode) -->
+          <g id="implantGroup" style="display:none;">
+            <!-- Gum line (soft tissue surface) -->
+            <path id="gumLine" d="" fill="#fca5a5" opacity="0.35" stroke="#f87171" stroke-width="1" stroke-dasharray="3,2"/>
+            <!-- Emergence profile highlight band -->
+            <path id="emergenceBandL" d="" fill="#10b981" opacity="0.22"/>
+            <path id="emergenceBandR" d="" fill="#10b981" opacity="0.22"/>
+            <!-- Abutment (connector between fixture and crown) -->
+            <path id="abutment" d="" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
+            <!-- Fixture (threaded implant body below gum line) -->
+            <path id="fixture" d="" fill="#64748b" stroke="#1e293b" stroke-width="1.5"/>
+            <!-- Thread lines on fixture -->
+            <g id="fixtureThreads" stroke="#1e293b" stroke-width="0.8" fill="none"></g>
+            <!-- Screw access (vertical channel) -->
+            <rect id="screwAccess" width="14" height="0" fill="#1e293b" opacity="0.25"/>
+            <!-- Emergence angle indicator line -->
+            <line id="emergenceAngleL" x1="0" y1="0" x2="0" y2="0" stroke="#059669" stroke-width="2" stroke-dasharray="4,3"/>
+            <line id="emergenceAngleR" x1="0" y1="0" x2="0" y2="0" stroke="#059669" stroke-width="2" stroke-dasharray="4,3"/>
+            <text id="emergenceLabel" x="0" y="0" font-size="10" fill="#059669" font-weight="700">エマージェンス</text>
+            <text id="gumLabel" x="495" y="0" text-anchor="end" font-size="10" fill="#b91c1c" font-weight="700">歯肉縁</text>
+          </g>
+
           <!-- CAD-cut markers — appear only when slider is positive (CAD removed material) -->
           <path id="contactPatchL" d="" fill="#dc2626" opacity="0" pointer-events="none"/>
           <path id="contactPatchR" d="" fill="#dc2626" opacity="0" pointer-events="none"/>
@@ -789,7 +811,7 @@ const MODE_INFO = {
 const MODE_HIDE = {
   hoken: [],
   zirconia: [],
-  implant: [],
+  implant: ['cementGap', 'extraCementGap', 'marginDistance'],
 };
 
 let currentMode = 'hoken';
@@ -1141,8 +1163,150 @@ function renderSvg() {
     document.getElementById('contactPatchTop').setAttribute('opacity', 0);
   }
 
+  // Implant-mode specific SVG adjustments
+  renderImplantOverlay(cx, crownTopY, crownBottomY, crownWidth, outerLeft, outerRight);
+
   // Update ratings
   updateRatings();
+}
+
+function renderImplantOverlay(cx, crownTopY, crownBottomY, crownWidth, outerLeft, outerRight) {
+  const implantGroup = document.getElementById('implantGroup');
+  const prepTooth = document.getElementById('prepTooth');
+  const primaryGapFill = document.getElementById('primaryGapFill');
+  const extraGapFill = document.getElementById('extraGapFill');
+  const marginLineL = document.getElementById('marginLineL');
+  const marginLineR = document.getElementById('marginLineR');
+  const marginLabel = document.getElementById('marginLabel');
+
+  if (currentMode !== 'implant') {
+    implantGroup.style.display = 'none';
+    prepTooth.style.display = '';
+    primaryGapFill.style.display = '';
+    extraGapFill.style.display = '';
+    marginLineL.style.display = '';
+    marginLineR.style.display = '';
+    marginLabel.style.display = '';
+    return;
+  }
+
+  // Hide prep-related elements
+  prepTooth.style.display = 'none';
+  primaryGapFill.style.display = 'none';
+  extraGapFill.style.display = 'none';
+  marginLineL.style.display = 'none';
+  marginLineR.style.display = 'none';
+  marginLabel.style.display = 'none';
+  implantGroup.style.display = '';
+
+  // Geometry constants for implant
+  const gumY = crownBottomY;                 // gum line ≈ crown bottom
+  const abutmentTopY = crownTopY + 30;       // abutment stops at crown inner base
+  const abutmentBottomY = gumY - 6;          // abutment base slightly above gum
+  const fixtureTopY = gumY + 4;              // fixture starts just below gum
+  const fixtureBottomY = gumY + 150;         // fixture extends ~ 3.75mm equivalent
+  const fixtureWidth = 58;
+  const abutmentTopW = 52;
+  const abutmentBottomW = 44;
+
+  // Gum line (horizontal band)
+  const gumPath = `
+    M 40 ${gumY}
+    L 560 ${gumY}
+    L 560 ${gumY + 8}
+    L 40 ${gumY + 8}
+    Z
+  `;
+  document.getElementById('gumLine').setAttribute('d', gumPath);
+
+  // Abutment (tapered connector from crown inner to fixture top)
+  const abutmentPath = `
+    M ${cx - abutmentTopW/2} ${abutmentTopY}
+    L ${cx + abutmentTopW/2} ${abutmentTopY}
+    L ${cx + abutmentBottomW/2} ${abutmentBottomY}
+    L ${cx - abutmentBottomW/2} ${abutmentBottomY}
+    Z
+  `;
+  document.getElementById('abutment').setAttribute('d', abutmentPath);
+
+  // Fixture (threaded screw-shaped body, rounded apex)
+  const fLeft = cx - fixtureWidth/2;
+  const fRight = cx + fixtureWidth/2;
+  const apex = fixtureBottomY;
+  const fixturePath = `
+    M ${fLeft} ${fixtureTopY}
+    L ${fRight} ${fixtureTopY}
+    L ${fRight} ${apex - 14}
+    Q ${fRight} ${apex}, ${cx + 8} ${apex}
+    L ${cx - 8} ${apex}
+    Q ${fLeft} ${apex}, ${fLeft} ${apex - 14}
+    Z
+  `;
+  document.getElementById('fixture').setAttribute('d', fixturePath);
+
+  // Thread lines across fixture (horizontal slanted segments)
+  const threads = document.getElementById('fixtureThreads');
+  threads.innerHTML = '';
+  const threadCount = 10;
+  const threadStart = fixtureTopY + 10;
+  const threadEnd = apex - 18;
+  const threadStep = (threadEnd - threadStart) / threadCount;
+  for (let i = 0; i <= threadCount; i++) {
+    const y = threadStart + i * threadStep;
+    const inset = i < 2 || i > threadCount - 2 ? 6 : 2;
+    threads.innerHTML += `<line x1="${fLeft + inset}" y1="${y}" x2="${fRight - inset}" y2="${y + 3}"/>`;
+  }
+
+  // Screw access channel (central vertical)
+  const screwAccess = document.getElementById('screwAccess');
+  screwAccess.setAttribute('x', cx - 7);
+  screwAccess.setAttribute('y', crownTopY + 35);
+  screwAccess.setAttribute('height', abutmentBottomY - crownTopY - 35);
+
+  // Emergence angle visualization — lines from abutment top corners outward
+  // Angle measured from vertical: larger angle = more divergent (risky)
+  const angleDeg = state.emergenceAngle;
+  const angleRad = angleDeg * Math.PI / 180;
+  const emLen = 62;
+  const emStartY = abutmentTopY;
+  const emEndL_x = (cx - abutmentTopW/2) - Math.sin(angleRad) * emLen;
+  const emEndL_y = emStartY - Math.cos(angleRad) * emLen;
+  const emEndR_x = (cx + abutmentTopW/2) + Math.sin(angleRad) * emLen;
+  const emEndR_y = emStartY - Math.cos(angleRad) * emLen;
+  document.getElementById('emergenceAngleL').setAttribute('x1', cx - abutmentTopW/2);
+  document.getElementById('emergenceAngleL').setAttribute('y1', emStartY);
+  document.getElementById('emergenceAngleL').setAttribute('x2', emEndL_x);
+  document.getElementById('emergenceAngleL').setAttribute('y2', emEndL_y);
+  document.getElementById('emergenceAngleR').setAttribute('x1', cx + abutmentTopW/2);
+  document.getElementById('emergenceAngleR').setAttribute('y1', emStartY);
+  document.getElementById('emergenceAngleR').setAttribute('x2', emEndR_x);
+  document.getElementById('emergenceAngleR').setAttribute('y2', emEndR_y);
+  const emLbl = document.getElementById('emergenceLabel');
+  emLbl.setAttribute('x', emEndR_x + 4);
+  emLbl.setAttribute('y', emEndR_y - 2);
+  emLbl.textContent = `エマージェンス ${Math.round(angleDeg)}°`;
+
+  // Emergence profile band (soft-tissue transition zone highlight)
+  const bandBottomY = gumY - 2;
+  const bandTopY = abutmentTopY - 4;
+  const bandInset = 6;
+  document.getElementById('emergenceBandL').setAttribute('d', `
+    M ${cx - abutmentTopW/2 - bandInset} ${bandTopY}
+    L ${cx - abutmentTopW/2 + 2} ${bandTopY}
+    L ${cx - abutmentBottomW/2 + 2} ${bandBottomY}
+    L ${cx - abutmentBottomW/2 - bandInset - 4} ${bandBottomY}
+    Z
+  `);
+  document.getElementById('emergenceBandR').setAttribute('d', `
+    M ${cx + abutmentTopW/2 + bandInset} ${bandTopY}
+    L ${cx + abutmentTopW/2 - 2} ${bandTopY}
+    L ${cx + abutmentBottomW/2 - 2} ${bandBottomY}
+    L ${cx + abutmentBottomW/2 + bandInset + 4} ${bandBottomY}
+    Z
+  `);
+
+  // Gum label position
+  document.getElementById('gumLabel').setAttribute('y', gumY - 3);
 }
 
 function updateRatings() {
