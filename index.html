@@ -131,6 +131,31 @@ body {
 }
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
+  /* On mobile, put visualization on top and make it sticky so it stays
+     visible while scrolling the controls below. */
+  .viz-panel {
+    order: -1;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    max-height: 52vh;
+    overflow: hidden;
+    background: var(--panel);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .viz-panel .viz-main h2 {
+    font-size: 0.85rem;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+  }
+  .viz-svg {
+    max-height: 42vh;
+    width: 100%;
+  }
+  /* Give the controls panel breathing room so first slider isn't hidden */
+  .panel {
+    scroll-margin-top: 54vh;
+  }
 }
 
 .panel {
