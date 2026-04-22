@@ -131,31 +131,31 @@ body {
 }
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
-  /* On mobile, put visualization on top and make it sticky so it stays
-     visible while scrolling the controls below. */
+  /* On mobile, put visualization on top and make it sticky — but compact,
+     so controls have room to breathe. */
   .viz-panel {
     order: -1;
     position: sticky;
     top: 0;
     z-index: 20;
-    max-height: 52vh;
+    max-height: 34vh;
     overflow: hidden;
     background: var(--panel);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    padding: 8px 10px;
   }
   .viz-panel .viz-main h2 {
-    font-size: 0.85rem;
-    padding-bottom: 4px;
-    margin-bottom: 4px;
+    font-size: 0.78rem;
+    padding-bottom: 3px;
+    margin-bottom: 3px;
   }
   .viz-svg {
-    max-height: 42vh;
+    max-height: 27vh;
     width: 100%;
   }
-  /* Give the controls panel breathing room so first slider isn't hidden */
-  .panel {
-    scroll-margin-top: 54vh;
-  }
+  .panel { scroll-margin-top: 36vh; }
+  /* Hide optional ratings panel on mobile to save room */
+  .ratings-panel { display: none; }
 }
 
 .panel {
