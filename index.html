@@ -1426,9 +1426,65 @@ ${currentMode === 'implant' ? `【エマージェンシー形態】
   }
 });
 
+// Load per-clinic preset from /clinics/<slug>.json when ?clinic=<slug> is present.
+// This lets each dental clinic have a bookmarked URL that always reflects
+// their current preset values — even after the lab updates them.
+async function loadClinicPreset() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('clinic');
+  if (!slug) return null;
+  // Sanitize slug to prevent path traversal (allow only lowercase alphanumeric + hyphen)
+  if (!/^[a-z0-9-]+$/.test(slug)) return null;
+  try {
+    const res = await fetch(`./clinics/${slug}.json`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    console.warn('Clinic preset load failed:', e);
+    return null;
+  }
+}
+
+function applyClinicData(data) {
+  if (!data) return;
+  // Mode (hoken / zirconia / implant)
+  const mode = data.mode && PRESETS[data.mode] ? data.mode : 'hoken';
+  applyMode(mode);
+
+  // Override preset values from clinic JSON
+  if (data.values) {
+    Object.keys(data.values).forEach(key => {
+      if (Object.prototype.hasOwnProperty.call(state, key)) {
+        const v = parseFloat(data.values[key]);
+        if (!Number.isNaN(v)) state[key] = v;
+        const input = document.getElementById(key);
+        if (input) input.value = state[key];
+      }
+    });
+    updateAllValues();
+    renderSvg();
+  }
+
+  // Banner showing clinic name + last updated
+  if (data.clinicName) {
+    document.getElementById('headerTitle').textContent = `⚙️ ${data.clinicName} プリセット`;
+    const sub = data.lastUpdated
+      ? `最終更新: ${data.lastUpdated}${data.updatedBy ? '（' + data.updatedBy + '）' : ''}`
+      : 'プリセット読込済み';
+    document.getElementById('headerSub').textContent = sub;
+  }
+}
+
 // Initial render
-applyMode('hoken');
-showExplain('cementGap');
+(async () => {
+  const clinicData = await loadClinicPreset();
+  if (clinicData) {
+    applyClinicData(clinicData);
+  } else {
+    applyMode('hoken');
+  }
+  showExplain('cementGap');
+})();
 </script>
 
 </body>
