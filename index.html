@@ -508,23 +508,6 @@ details.advanced[open] summary {
           <div class="desc">内面スムージングの範囲・大きいほど滑らか</div>
         </div>
 
-        <div class="slider-row" data-param="drillRadius">
-          <div class="label-row">
-            <span class="label">ドリル半径</span>
-            <span class="value"><span id="v-drillRadius">0.550</span><span class="unit">mm</span></span>
-          </div>
-          <input type="range" id="drillRadius" min="0.300" max="0.800" step="0.025" value="0.550">
-          <div class="desc">ミリングバー半径。変更不要（機材依存）</div>
-        </div>
-
-        <div class="slider-row" data-param="drillOffset">
-          <div class="label-row">
-            <span class="label">ドリル補正オフセット</span>
-            <span class="value"><span id="v-drillOffset">0.50</span><span class="unit">mm</span></span>
-          </div>
-          <input type="range" id="drillOffset" min="0.20" max="1.00" step="0.05" value="0.50">
-          <div class="desc">ドリルが届かない箇所の補正量</div>
-        </div>
       </details>
 
       <div class="actions">
@@ -718,14 +701,6 @@ const EXPLAIN = {
     title: 'スムージング距離',
     body: '内面のスムージング処理範囲。大きいほど内面が滑らか、小さいほどスキャンデータに忠実。通常0.2mm標準。'
   },
-  drillRadius: {
-    title: 'ドリル半径',
-    body: 'ミリング機のバー半径。機材依存で基本的には変更不要。ラボ側で管理する値。'
-  },
-  drillOffset: {
-    title: 'ドリル補正オフセット',
-    body: 'バーが届かない鋭角部分の補正量。大きすぎると適合悪化、小さすぎるとチッピング。'
-  },
   emergenceAngle: {
     title: 'エマージェンス角度（Emergence Angle）',
     body: '<b>歯肉縁下（プラットフォーム→歯肉縁）で軟組織を押している輪郭の傾き</b>。補綴物の長軸（垂直）に対する角度で測る。<br><br><b>小さい（緩やか・＜30°）</b>：サブジンジバル側が細く立ち上がる → 歯肉への圧迫少・血流維持・清掃性◎<br><b>大きい（急峻・＞30°）</b>：サブジンジバル側が太く広がる → 歯肉を外側に押し出す・退縮・プラーク停滞・炎症リスク↑<br><br><b>臨床標準値</b><br>・自然歯 前歯：27-30°<br>・自然歯 臼歯：36-39°<br>・<b>インプラント補綴：≦30°推奨</b>（＞30°で歯肉炎症・縁下骨吸収リスク顕著・Soulami 2022 systematic review）<br><br>インプラントでは特に重要——軟組織シール形成と長期予後を決定する要素。スライダーで歯肉縁下の輪郭が太く/細くなる様子を確認できる。'
@@ -742,8 +717,6 @@ const PRESETS = {
     antagonistDistance: -0.05,
     adjacentDistance: -0.05,
     smoothingDistance: 0.20,
-    drillRadius: 0.550,
-    drillOffset: 0.50,
   },
   zirconia: {
     cementGap: 0.040,       // 3Shape推奨値
@@ -753,8 +726,6 @@ const PRESETS = {
     antagonistDistance: -0.05,
     adjacentDistance: -0.05,
     smoothingDistance: 0.20,
-    drillRadius: 0.550,
-    drillOffset: 0.50,
   },
   implant: {
     cementGap: 0.050,
@@ -764,8 +735,6 @@ const PRESETS = {
     antagonistDistance: -0.02,
     adjacentDistance: -0.03,
     smoothingDistance: 0.20,
-    drillRadius: 0.550,
-    drillOffset: 0.50,
   }
 };
 
@@ -799,7 +768,6 @@ let currentMode = 'hoken';
 const state = { ...PRESETS.hoken };
 
 function formatValue(param, v) {
-  if (param === 'drillRadius') return v.toFixed(3);
   if (param === 'cementGap' || param === 'extraCementGap') return v.toFixed(3);
   if (param === 'antagonistDistance' || param === 'adjacentDistance') return (v>=0?'+':'') + v.toFixed(2);
   if (param === 'emergenceAngle') return Math.round(v).toString();
@@ -1366,9 +1334,7 @@ const HIGHLIGHT_MAP = {
   marginDistance:    ['primaryGapFill', 'extraGapFill', 'marginLineL', 'marginLineR', 'marginLabel'],
   antagonistDistance:['crownOuter', 'contactPatchTop'],
   adjacentDistance:  ['crownOuter', 'contactPatchL', 'contactPatchR'],
-  smoothingDistance: ['prepTooth'],
-  drillRadius:       ['prepTooth'],
-  drillOffset:       ['prepTooth']
+  smoothingDistance: ['prepTooth']
 };
 
 let highlightTimer = null;
@@ -1443,9 +1409,7 @@ document.getElementById('btnSave').addEventListener('click', () => {
   隣在歯までの所望距離     ${formatValue('adjacentDistance', state.adjacentDistance)} mm
 
 【詳細】
-  スムージング距離        ${formatValue('smoothingDistance', state.smoothingDistance)} mm
-  ドリル半径              ${formatValue('drillRadius', state.drillRadius)} mm
-  ドリル補正オフセット     ${formatValue('drillOffset', state.drillOffset)} mm`;
+  スムージング距離        ${formatValue('smoothingDistance', state.smoothingDistance)} mm`;
   output.textContent = text;
   output.classList.add('show');
 
