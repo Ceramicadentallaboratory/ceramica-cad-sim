@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CADプリセットシミュレーター（3Shape準拠） | Ceramica Dental Laboratory</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0b2e59;
+  --secondary: #1a5b9e;
+  --accent: #10B981;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --bg: #f7f9fc;
+  --panel: #ffffff;
+  --text: #1a1a1a;
+  --text-light: #666;
+  --border: #e2e8f0;
+  --gap-primary: #3b82f6;
+  --gap-extra: #1d4ed8;
+  --gap-bite: #f59e0b;
+  --gap-contact: #10b981;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding: 12px;
+}
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.header {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+  padding: 16px 24px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.header .sub {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+.header .lab {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  text-align: right;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 14px;
+}
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.panel h2 {
+  font-size: 0.95rem;
+  color: var(--primary);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.panel h3 {
+  font-size: 0.82rem;
+  color: var(--text-light);
+  margin: 14px 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slider-row {
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: #fafbfd;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.slider-row .label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.slider-row .label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.slider-row .value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+}
+.slider-row .value .unit {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-weight: 500;
+  margin-left: 2px;
+}
+.slider-row input[type=range] {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e2e8f0;
+  border-radius: 3px;
+  outline: none;
+}
+.slider-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--secondary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.slider-row input[type=range]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--secondary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid #fff;
+}
+.slider-row .desc {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.slider-row .desc .tight {
+  color: var(--danger);
+  font-weight: 600;
+}
+.slider-row .desc .loose {
+  color: var(--warn);
+  font-weight: 600;
+}
+.slider-row.active {
+  border-color: var(--secondary);
+  background: #f0f7ff;
+}
+
+.viz-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.viz-main {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.viz-main h2 {
+  font-size: 0.95rem;
+  color: var(--primary);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--secondary);
+}
+.viz-svg {
+  background: linear-gradient(to bottom, #e0f2fe 0%, #f0f9ff 100%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+}
+.viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 0.78rem;
+}
+.viz-legend .chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.viz-legend .swatch {
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.info-card {
+  background: #fafbfd;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.info-card .label {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+.info-card .value {
+  font-size: 1.1rem;
+  color: var(--primary);
+  font-weight: 700;
+  margin-top: 2px;
+}
+.info-card .note {
+  font-size: 0.7rem;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.btn {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--secondary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--primary); }
+.btn-secondary {
+  background: #fff;
+  color: var(--secondary);
+  border: 1px solid var(--secondary);
+}
+.btn-secondary:hover { background: #f0f7ff; }
+
+.explain-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  line-height: 1.7;
+}
+.explain-panel h3 {
+  font-size: 0.85rem;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.footer {
+  text-align: center;
+  padding: 12px;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-top: 14px;
+}
+
+.preset-output {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+  margin-top: 10px;
+  display: none;
+}
+.preset-output.show { display: block; }
+
+details.advanced {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+details.advanced summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+details.advanced[open] summary {
+  margin-bottom: 10px;
+  color: var(--primary);
+}
+/* Pulse glow for the SVG region corresponding to the slider being adjusted */
+@keyframes pulseGlow {
+  0%   { filter: drop-shadow(0 0 0 rgba(250, 204, 21, 0)); }
+  50%  { filter: drop-shadow(0 0 10px rgba(250, 204, 21, 1)); }
+  100% { filter: drop-shadow(0 0 0 rgba(250, 204, 21, 0)); }
+}
+.pulsing {
+  animation: pulseGlow 0.9s ease-in-out infinite;
+}
+#focusBand {
+  fill: #fde047;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+#focusBand.visible { opacity: 0.35; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div>
+      <h1>⚙️ CADプリセットシミュレーター</h1>
+      <div class="sub">3Shape Dental System 準拠 ・ スライダーを動かすと内面空隙・接触が視覚的に変わります</div>
+    </div>
+    <div class="lab">
+      Ceramica Dental Laboratory<br>
+      北海道帯広市
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- Controls Panel -->
+    <div class="panel">
+      <h2>🎛️ ダイインターフェース > 詳細設定</h2>
+
+      <div class="slider-row" data-param="cementGap">
+        <div class="label-row">
+          <span class="label">セメント間隙</span>
+          <span class="value"><span id="v-cementGap">0.040</span><span class="unit">mm</span></span>
+        </div>
+        <input type="range" id="cementGap" min="0.030" max="0.120" step="0.005" value="0.040">
+        <div class="desc"><span class="tight">下げる＝きつい</span>（脱離しにくい・調整時間↑） / <span class="loose">上げる＝ゆるい</span>（はめやすい・脱離リスク↑）</div>
+      </div>
+
+      <div class="slider-row" data-param="extraCementGap">
+        <div class="label-row">
+          <span class="label">追加のセメント間隙</span>
+          <span class="value"><span id="v-extraCementGap">0.050</span><span class="unit">mm</span></span>
+        </div>
+        <input type="range" id="extraCementGap" min="0.030" max="0.150" step="0.005" value="0.050">
+        <div class="desc">マージンラインから上部の領域に適用される間隙。セメント逃げ道を確保</div>
+      </div>
+
+      <div class="slider-row" data-param="marginDistance">
+        <div class="label-row">
+          <span class="label">マージンラインまでの距離</span>
+          <span class="value"><span id="v-marginDistance">1.00</span><span class="unit">mm</span></span>
+        </div>
+        <input type="range" id="marginDistance" min="0.50" max="2.00" step="0.05" value="1.00">
+        <div class="desc">下ゾーン（セメント間隙）と上ゾーン（追加のセメント間隙）の境界位置</div>
+      </div>
+
+      <h2 style="margin-top:14px;">🔧 接触</h2>
+
+      <div class="slider-row" data-param="antagonistDistance">
+        <div class="label-row">
+          <span class="label">対合歯までの所望距離</span>
+          <span class="value"><span id="v-antagonistDistance">-0.05</span><span class="unit">mm</span></span>
+        </div>
+        <input type="range" id="antagonistDistance" min="-0.10" max="0.20" step="0.01" value="-0.05">
+        <div class="desc"><span class="tight">マイナス＝対合と接触</span>（咬合接触あり） / <span class="loose">プラス＝離す</span>（咬合なし・調整時間↓）</div>
+      </div>
+
+      <div class="slider-row" data-param="adjacentDistance">
+        <div class="label-row">
+          <span class="label">隣在歯までの所望距離</span>
+          <span class="value"><span id="v-adjacentDistance">-0.05</span><span class="unit">mm</span></span>
+        </div>
+        <input type="range" id="adjacentDistance" min="-0.10" max="0.10" step="0.01" value="-0.05">
+        <div class="desc"><span class="tight">マイナス＝きついコンタクト</span> / <span class="loose">プラス＝ゆるいコンタクト</span></div>
+      </div>
+
+      <details class="advanced">
+        <summary>▶ 高度な設定（スムージング・ドリル補正）</summary>
+
+        <div class="slider-row" data-param="smoothingDistance" style="margin-top:10px;">
+          <div class="label-row">
+            <span class="label">スムージング距離</span>
+            <span class="value"><span id="v-smoothingDistance">0.20</span><span class="unit">mm</span></span>
+          </div>
+          <input type="range" id="smoothingDistance" min="0.05" max="0.50" step="0.01" value="0.20">
+          <div class="desc">内面スムージングの範囲・大きいほど滑らか</div>
+        </div>
+
+        <div class="slider-row" data-param="drillRadius">
+          <div class="label-row">
+            <span class="label">ドリル半径</span>
+            <span class="value"><span id="v-drillRadius">0.550</span><span class="unit">mm</span></span>
+          </div>
+          <input type="range" id="drillRadius" min="0.300" max="0.800" step="0.025" value="0.550">
+          <div class="desc">ミリングバー半径。変更不要（機材依存）</div>
+        </div>
+
+        <div class="slider-row" data-param="drillOffset">
+          <div class="label-row">
+            <span class="label">ドリル補正オフセット</span>
+            <span class="value"><span id="v-drillOffset">0.50</span><span class="unit">mm</span></span>
+          </div>
+          <input type="range" id="drillOffset" min="0.20" max="1.00" step="0.05" value="0.50">
+          <div class="desc">ドリルが届かない箇所の補正量</div>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button class="btn btn-secondary" id="btnReset">デフォルトに戻す</button>
+        <button class="btn btn-primary" id="btnSave">プリセット保存</button>
+      </div>
+
+      <pre class="preset-output" id="presetOutput"></pre>
+    </div>
+
+    <!-- Visualization Panel -->
+    <div class="viz-panel">
+
+      <div class="viz-main">
+        <h2>🦷 冠内面・隣接・咬合 断面ビュー</h2>
+
+        <svg class="viz-svg" viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background grid -->
+          <defs>
+            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e0e7ef" stroke-width="0.5"/>
+            </pattern>
+            <linearGradient id="metalGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#94a3b8"/>
+              <stop offset="50%" stop-color="#64748b"/>
+              <stop offset="100%" stop-color="#475569"/>
+            </linearGradient>
+            <linearGradient id="crownGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#e2e8f0"/>
+            </linearGradient>
+            <linearGradient id="toothGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fef3c7"/>
+              <stop offset="100%" stop-color="#fde68a"/>
+            </linearGradient>
+          </defs>
+          <rect width="600" height="500" fill="url(#grid)"/>
+
+          <!-- Opposing tooth (top, cusps facing down) -->
+          <path id="antagonistTooth" d="" fill="url(#toothGrad)" stroke="#a16207" stroke-width="1.5"/>
+          <text x="300" y="30" text-anchor="middle" font-size="12" fill="#a16207" font-weight="700">対合歯</text>
+
+          <!-- Adjacent teeth (sides, tooth silhouettes with contact bulges) -->
+          <path id="adjacentLeft" d="" fill="url(#toothGrad)" stroke="#a16207" stroke-width="1.5"/>
+          <path id="adjacentRight" d="" fill="url(#toothGrad)" stroke="#a16207" stroke-width="1.5"/>
+          <text x="75" y="148" text-anchor="middle" font-size="11" fill="#a16207" font-weight="700">隣在歯</text>
+          <text x="525" y="148" text-anchor="middle" font-size="11" fill="#a16207" font-weight="700">隣在歯</text>
+
+          <!-- Crown (outer) -->
+          <path id="crownOuter" d="" fill="url(#crownGrad)" stroke="var(--primary)" stroke-width="2"/>
+
+          <!-- Cement gap fill (extra zone) -->
+          <path id="extraGapFill" d="" fill="#1d4ed8" opacity="0.45"/>
+          <!-- Cement gap fill (primary zone) -->
+          <path id="primaryGapFill" d="" fill="#3b82f6" opacity="0.6"/>
+
+          <!-- Prepared tooth (inner stump) -->
+          <path id="prepTooth" d="" fill="url(#metalGrad)" stroke="#334155" stroke-width="1.5"/>
+
+          <!-- CAD-cut markers — appear only when slider is positive (CAD removed material) -->
+          <path id="contactPatchL" d="" fill="#dc2626" opacity="0" pointer-events="none"/>
+          <path id="contactPatchR" d="" fill="#dc2626" opacity="0" pointer-events="none"/>
+          <path id="contactPatchTop" d="" fill="#dc2626" opacity="0" pointer-events="none"/>
+
+          <!-- Margin line (dashed) -->
+          <line id="marginLineL" x1="0" y1="0" x2="0" y2="0" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <line id="marginLineR" x1="0" y1="0" x2="0" y2="0" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text id="marginLabel" x="0" y="0" font-size="10" fill="#dc2626" font-weight="700">マージンライン</text>
+
+          <!-- Bite gap annotation -->
+          <g id="biteAnnotation">
+            <line x1="290" y1="80" x2="290" y2="130" stroke="#f59e0b" stroke-width="1"/>
+            <line x1="280" y1="80" x2="300" y2="80" stroke="#f59e0b" stroke-width="1"/>
+            <line x1="280" y1="130" x2="300" y2="130" stroke="#f59e0b" stroke-width="1"/>
+            <text id="biteLabel" x="310" y="110" font-size="11" fill="#d97706" font-weight="700">バイト</text>
+          </g>
+
+          <!-- Contact gap annotation (right side) -->
+          <g id="contactAnnotation">
+            <text id="contactLabelR" x="430" y="260" font-size="10" fill="#059669" font-weight="700">コンタクト</text>
+          </g>
+
+          <!-- Scale reference -->
+          <g>
+            <line x1="20" y1="470" x2="120" y2="470" stroke="#475569" stroke-width="2"/>
+            <line x1="20" y1="465" x2="20" y2="475" stroke="#475569" stroke-width="2"/>
+            <line x1="120" y1="465" x2="120" y2="475" stroke="#475569" stroke-width="2"/>
+            <text x="70" y="488" text-anchor="middle" font-size="10" fill="#475569">約 2.5mm（視覚用拡大表示）</text>
+          </g>
+        </svg>
+
+        <div class="viz-legend">
+          <div class="chip"><div class="swatch" style="background:#3b82f6;opacity:0.6"></div>セメント間隙</div>
+          <div class="chip"><div class="swatch" style="background:#1d4ed8;opacity:0.45"></div>追加のセメント間隙</div>
+          <div class="chip"><div class="swatch" style="background:#dc2626"></div>マージンライン</div>
+          <div class="chip"><div class="swatch" style="background:url(#metalGrad);background:linear-gradient(#94a3b8,#475569)"></div>支台歯</div>
+          <div class="chip"><div class="swatch" style="background:url(#crownGrad);background:linear-gradient(#fff,#e2e8f0);border:1px solid #94a3b8"></div>冠</div>
+        </div>
+      </div>
+
+      <div class="viz-main">
+        <h2>📊 現在の設定値サマリ</h2>
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="label">内面フィット感</div>
+            <div class="value" id="fitRating">標準</div>
+            <div class="note" id="fitNote">適切なフィット</div>
+          </div>
+          <div class="info-card">
+            <div class="label">咬合接触</div>
+            <div class="value" id="biteRating">接触あり</div>
+            <div class="note" id="biteNote">ABC接触可能</div>
+          </div>
+          <div class="info-card">
+            <div class="label">コンタクト強度</div>
+            <div class="value" id="contactRating">標準</div>
+            <div class="note" id="contactNote">フロス通過OK</div>
+          </div>
+          <div class="info-card">
+            <div class="label">実用リスク</div>
+            <div class="value" id="riskRating">低</div>
+            <div class="note" id="riskNote">問題なし</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="explain-panel" id="explainPanel">
+        <h3>💡 パラメータ解説</h3>
+        <p>左のスライダーにマウスを合わせると、ここに詳しい解説が表示されます。</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    Ceramica Dental Laboratory ・ 3Shape Dental System 準拠 ・ 北海道帯広市<br>
+    090-6998-8023 ・ https://ceramica-dental.com
+  </div>
+
+</div>
+
+<script>
+const EXPLAIN = {
+  cementGap: {
+    title: 'セメント間隙（Cement Gap）',
+    body: '<b>マージン付近の壁面（下ゾーン）</b>に適用される間隙。支台歯と冠の内面の間にセメントが入り込む余地を決める、マージン側の主パラメータ。<br><br><b>下げる（例 0.030mm）</b>：きつくフィット、脱離しにくい、調整に時間がかかる<br><b>上げる（例 0.120mm）</b>：はめやすい、脱離リスク上昇、セメント厚が厚い<br><br>標準値：保険CAD 0.040mm / インレー 0.050-0.070mm / ジルコニア冠 0.020-0.030mm（3Shape Cradle推奨 30μm・マージン付近はむしろ狭めが適合良好）。'
+  },
+  extraCementGap: {
+    title: '追加のセメント間隙（Extra Cement Gap）',
+    body: '<b>マージンから離れた上部（咬合面側）に独立して適用される別ゾーンの間隙</b>。"追加"＝セメント間隙に足し算するわけではなく、"別の領域にもうひとつ間隙値を追加設定する"の意味（日本語訳がやや紛らわしい）。<br><br>装着時のセメントの逃げ道を確保し、沈みこみ圧を分散させる役割。通常セメント間隙より約+0.010〜+0.030mm広めに設定。保険CAD 0.050mm / インレー 0.060-0.080mm / ジルコニア冠 0.040-0.050mm（マージン25μm＋咬合側50μmが文献上の最良フィット）。<br><br>狭すぎると装着時にセメントが抜けず冠が浮く原因に。'
+  },
+  marginDistance: {
+    title: 'マージンラインまでの距離（Distance to Margin Line）',
+    body: 'マージンから何mmの高さまでを「セメント間隙ゾーン（下）」にして、そこから上を「追加のセメント間隙ゾーン（上）」に切り替えるかの<b>ゾーン境界線の位置</b>。<br><br><b>短くする（例 0.5mm）</b>：マージン帯が狭くなる → はめやすいが辺縁の密着域が短く、辺縁からセメント洗い出しのリスク<br><b>長くする（例 1.5〜2.0mm）</b>：マージン帯が長くなる → 辺縁適合◎だが引っかかりやすく試適調整が増える<br><br><b>標準 1.0mm</b>：マージン付近1mmをしっかり締め、それより上は逃げを確保。'
+  },
+  antagonistDistance: {
+    title: '対合歯までの所望距離（Desired Distance to Antagonist）',
+    body: '冠の咬合面と対合歯との距離。バイト＝咬合接触の強さを決定。<br><br><b>マイナス値（-0.05mm）</b>：対合と接触する設計（ABC接触・咬合機能確保）<br><b>ゼロ（0mm）</b>：ギリギリ接触<br><b>プラス値（+0.10mm）</b>：咬合接触なし（ナイトガード等の用途）<br><br>通常補綴は-0.05 ~ -0.02mmが標準。'
+  },
+  adjacentDistance: {
+    title: '隣在歯までの所望距離（Desired Distance to Adjacent）',
+    body: '冠と隣接歯との距離。コンタクトの強さを決定。<br><br><b>マイナス値（-0.08mm）</b>：きついコンタクト（フロス通りにくい・院長の好み）<br><b>-0.05mm</b>：標準（フロス抵抗あり）<br><b>ゼロ（0mm）</b>：軽く接触<br><b>プラス値</b>：離開（ブリッジポンティック等以外は非推奨）<br><br>臨床標準：-0.05 ~ -0.03mm。'
+  },
+  smoothingDistance: {
+    title: 'スムージング距離',
+    body: '内面のスムージング処理範囲。大きいほど内面が滑らか、小さいほどスキャンデータに忠実。通常0.2mm標準。'
+  },
+  drillRadius: {
+    title: 'ドリル半径',
+    body: 'ミリング機のバー半径。機材依存で基本的には変更不要。ラボ側で管理する値。'
+  },
+  drillOffset: {
+    title: 'ドリル補正オフセット',
+    body: 'バーが届かない鋭角部分の補正量。大きすぎると適合悪化、小さすぎるとチッピング。'
+  }
+};
+
+const DEFAULTS = {
+  cementGap: 0.040,
+  extraCementGap: 0.050,
+  marginDistance: 1.00,
+  antagonistDistance: -0.05,
+  adjacentDistance: -0.05,
+  smoothingDistance: 0.20,
+  drillRadius: 0.550,
+  drillOffset: 0.50
+};
+
+const state = { ...DEFAULTS };
+
+function formatValue(param, v) {
+  if (param === 'drillRadius') return v.toFixed(3);
+  if (param === 'cementGap' || param === 'extraCementGap') return v.toFixed(3);
+  if (param === 'antagonistDistance' || param === 'adjacentDistance') return (v>=0?'+':'') + v.toFixed(2);
+  return v.toFixed(2);
+}
+
+function updateAllValues() {
+  Object.keys(state).forEach(param => {
+    const el = document.getElementById('v-' + param);
+    if (el) el.textContent = formatValue(param, state[param]);
+  });
+}
+
+// Scale: 1mm in "tooth space" = 40 svg units for visualization
+const SCALE = 40;
+// Exaggeration for very small gaps (cement gaps, bite, contact)
+// 0.07mm raw = 0.07*40 = 2.8px — too small. Multiply for visibility.
+const GAP_EXAG = 6;
+
+function renderSvg() {
+  // Layout constants
+  const cx = 300; // center X
+  const crownTopY = 130; // top of crown
+  const crownBottomY = 340; // bottom of crown (margin baseline)
+  const crownWidth = 170;
+  const prepTaper = 30; // taper of prep from top to bottom
+
+  // Crown outer shape: wide at top, narrow at bottom (typical molar crown profile)
+  // Slight convex sides
+  const outerLeft = cx - crownWidth/2;
+  const outerRight = cx + crownWidth/2;
+  const bottomLeft = cx - (crownWidth/2 - 5);
+  const bottomRight = cx + (crownWidth/2 - 5);
+
+  // Signed offsets — positive = crown retreats (gap opens), negative = crown penetrates (食い込み)
+  // Negative direction is dampened (real interference is subtle, not dramatic)
+  const INTRUDE_DAMPEN = 0.35;
+  const adjRaw  = state.adjacentDistance   * SCALE * GAP_EXAG;
+  const biteRaw = state.antagonistDistance * SCALE * GAP_EXAG;
+  const adjOffset  = adjRaw  < 0 ? adjRaw  * INTRUDE_DAMPEN : adjRaw;
+  const biteOffset = biteRaw < 0 ? biteRaw * INTRUDE_DAMPEN : biteRaw;
+  // Positive-only versions (for red CAD-cut markers and gap band positions)
+  const adjCut  = Math.max(0, adjOffset);
+  const biteCut = Math.max(0, biteOffset);
+
+  // Iconographic crown — FLAT top / FLAT sides / slight rounded corners.
+  // Top moves with biteOffset (+ retreat / − dig into opposing);
+  // sides move with adjOffset  (+ retreat / − dig into adjacent).
+  const crownTopEdge = crownTopY + biteOffset;
+  const crownPath = `
+    M ${outerLeft} ${crownBottomY}
+    L ${outerLeft - 4 + adjOffset} ${crownBottomY - 20}
+    L ${outerLeft + 4 + adjOffset} ${crownTopEdge + 28}
+    Q ${outerLeft + 8 + adjOffset} ${crownTopEdge + 6}, ${outerLeft + 22 + adjOffset * 0.4} ${crownTopEdge}
+    L ${outerRight - 22 - adjOffset * 0.4} ${crownTopEdge}
+    Q ${outerRight - 8 - adjOffset} ${crownTopEdge + 6}, ${outerRight - 4 - adjOffset} ${crownTopEdge + 28}
+    L ${outerRight + 4 - adjOffset} ${crownBottomY - 20}
+    L ${outerRight} ${crownBottomY}
+    Z
+  `;
+  document.getElementById('crownOuter').setAttribute('d', crownPath);
+
+  // Prep tooth (stump inside crown) — FIXED geometry (physical object).
+  // Gap band thickness changes; prep does NOT deform.
+  // Use max-state offsets so band can always fit between prep and crown outer.
+  const maxCementPx = 0.120 * SCALE * GAP_EXAG; // widest band bottom
+  const maxExtraPx = 0.150 * SCALE * GAP_EXAG; // widest band top
+  const cementPx = state.cementGap * SCALE * GAP_EXAG; // current band thickness (bottom)
+  const extraCementPx = state.extraCementGap * SCALE * GAP_EXAG; // current band thickness (top)
+  const marginDistPx = state.marginDistance * SCALE; // real scale
+  const minThickPx = 0.50 * SCALE; // fixed at 0.50mm
+
+  // The margin line is at crownBottomY (the bottom of crown).
+  const transitionY = crownBottomY - marginDistPx;
+
+  // Prep top Y: determined by minimum thickness (pushed lower so the extra cement
+  // gap band has visible room between prep peak and the crown's inner fossa)
+  const prepTopY = crownTopY + minThickPx * 2.6;
+
+  // Prep outline fixed at max offsets (physical tooth, does not change)
+  const prepBottomLeft = outerLeft + maxCementPx;
+  const prepBottomRight = outerRight - maxCementPx;
+  const prepTopLeft = outerLeft + maxExtraPx + prepTaper/2;
+  const prepTopRight = outerRight - maxExtraPx - prepTaper/2;
+  // Gap band outer edges (move with state values; toward crown as gap increases)
+  const gapBottomLeft = outerLeft + (maxCementPx - cementPx);
+  const gapBottomRight = outerRight - (maxCementPx - cementPx);
+  const gapTopLeft = outerLeft + (maxExtraPx - extraCementPx) + prepTaper/2;
+  const gapTopRight = outerRight - (maxExtraPx - extraCementPx) - prepTaper/2;
+
+  // Prep path (FIXED — uses max offsets, does not change with sliders)
+  const prepPath = `
+    M ${prepBottomLeft} ${crownBottomY}
+    L ${outerLeft + maxExtraPx} ${transitionY}
+    L ${prepTopLeft} ${prepTopY + 15}
+    Q ${cx - 15} ${prepTopY - 3}, ${cx} ${prepTopY + 2}
+    Q ${cx + 15} ${prepTopY - 3}, ${prepTopRight} ${prepTopY + 15}
+    L ${outerRight - maxExtraPx} ${transitionY}
+    L ${prepBottomRight} ${crownBottomY}
+    Z
+  `;
+  document.getElementById('prepTooth').setAttribute('d', prepPath);
+
+  // Extra gap fill: two side strips above transitionY, outer edge VARIES with state.
+  // Top boundary must stay BELOW the crown's inner occlusal surface (crown outer fossa + wall thickness).
+  // Crown outer fossa at y=crownTopY+10 → crown inner ~ crownTopY+30. Peak set safely below that.
+  // Moves down with biteCut so the band retracts together with the cusps.
+  const extraOuterInset = maxExtraPx - extraCementPx;
+  const extraTopY = crownTopY + 36 + biteCut * 0.3;
+  const extraSideY = crownTopY + 42 + biteCut * 0.3;
+  const extraGapPath = `
+    M ${outerLeft + extraOuterInset} ${transitionY}
+    L ${outerLeft + extraOuterInset + 6} ${crownTopY + 55}
+    Q ${outerLeft + extraOuterInset + 14} ${extraSideY + 4}, ${cx - 24} ${extraSideY}
+    Q ${cx - 8} ${extraTopY + 2}, ${cx} ${extraTopY}
+    Q ${cx + 8} ${extraTopY + 2}, ${cx + 24} ${extraSideY}
+    Q ${outerRight - extraOuterInset - 14} ${extraSideY + 4}, ${outerRight - extraOuterInset - 6} ${crownTopY + 55}
+    L ${outerRight - extraOuterInset} ${transitionY}
+    L ${outerRight - maxExtraPx} ${transitionY}
+    L ${prepTopRight} ${prepTopY + 15}
+    Q ${cx + 15} ${prepTopY - 3}, ${cx} ${prepTopY + 2}
+    Q ${cx - 15} ${prepTopY - 3}, ${prepTopLeft} ${prepTopY + 15}
+    L ${outerLeft + maxExtraPx} ${transitionY}
+    Z
+  `;
+  document.getElementById('extraGapFill').setAttribute('d', extraGapPath);
+
+  // Primary gap fill: two side strips below transitionY, outer edge VARIES with state
+  const primaryOuterInsetBottom = maxCementPx - cementPx;
+  const primaryOuterInsetTop = maxExtraPx - extraCementPx;
+  const primaryGapPath = `
+    M ${outerLeft + primaryOuterInsetBottom} ${crownBottomY}
+    L ${outerLeft + primaryOuterInsetTop} ${transitionY}
+    L ${outerLeft + maxExtraPx} ${transitionY}
+    L ${prepBottomLeft} ${crownBottomY}
+    Z
+    M ${outerRight - primaryOuterInsetBottom} ${crownBottomY}
+    L ${outerRight - primaryOuterInsetTop} ${transitionY}
+    L ${outerRight - maxExtraPx} ${transitionY}
+    L ${prepBottomRight} ${crownBottomY}
+    Z
+  `;
+  document.getElementById('primaryGapFill').setAttribute('d', primaryGapPath);
+
+  // Margin lines (dashed red at crownBottomY)
+  document.getElementById('marginLineL').setAttribute('x1', outerLeft - 30);
+  document.getElementById('marginLineL').setAttribute('y1', crownBottomY);
+  document.getElementById('marginLineL').setAttribute('x2', outerLeft + 5);
+  document.getElementById('marginLineL').setAttribute('y2', crownBottomY);
+  document.getElementById('marginLineR').setAttribute('x1', outerRight - 5);
+  document.getElementById('marginLineR').setAttribute('y1', crownBottomY);
+  document.getElementById('marginLineR').setAttribute('x2', outerRight + 30);
+  document.getElementById('marginLineR').setAttribute('y2', crownBottomY);
+  document.getElementById('marginLabel').setAttribute('x', outerRight + 35);
+  document.getElementById('marginLabel').setAttribute('y', crownBottomY + 4);
+
+  // Opposing tooth — near-flat bottom with SUBTLE tooth hint: shallow cusp bumps
+  // at cx±40 and a tiny fossa dip at center. ~3-4 px undulation.
+  // Fixed so bottom touches crown top exactly when slider=0.
+  const antagonistBottomY = crownTopY;
+  const antTopY = 35;
+  const antHalfW = 95;
+  const antagonistPath = `
+    M ${cx - antHalfW} ${antTopY}
+    L ${cx - antHalfW} ${antagonistBottomY - 12}
+    Q ${cx - antHalfW} ${antagonistBottomY - 2}, ${cx - antHalfW + 12} ${antagonistBottomY - 1}
+    Q ${cx - 55} ${antagonistBottomY + 2}, ${cx - 40} ${antagonistBottomY + 3}
+    Q ${cx - 20} ${antagonistBottomY + 1}, ${cx} ${antagonistBottomY - 1}
+    Q ${cx + 20} ${antagonistBottomY + 1}, ${cx + 40} ${antagonistBottomY + 3}
+    Q ${cx + 55} ${antagonistBottomY + 2}, ${cx + antHalfW - 12} ${antagonistBottomY - 1}
+    Q ${cx + antHalfW} ${antagonistBottomY - 2}, ${cx + antHalfW} ${antagonistBottomY - 12}
+    L ${cx + antHalfW} ${antTopY}
+    Z
+  `;
+  document.getElementById('antagonistTooth').setAttribute('d', antagonistPath);
+
+  // Bite annotation
+  const biteLine = document.querySelector('#biteAnnotation line:nth-child(1)');
+  biteLine.setAttribute('y1', antagonistBottomY + 5);
+  biteLine.setAttribute('y2', crownTopY - 5);
+  document.querySelector('#biteAnnotation line:nth-child(2)').setAttribute('y1', antagonistBottomY + 5);
+  document.querySelector('#biteAnnotation line:nth-child(2)').setAttribute('y2', antagonistBottomY + 5);
+  document.querySelector('#biteAnnotation line:nth-child(3)').setAttribute('y1', crownTopY - 5);
+  document.querySelector('#biteAnnotation line:nth-child(3)').setAttribute('y2', crownTopY - 5);
+  document.getElementById('biteLabel').setAttribute('y', (antagonistBottomY + crownTopY)/2 + 4);
+  document.getElementById('biteLabel').textContent = 'バイト ' + formatValue('antagonistDistance', state.antagonistDistance) + 'mm';
+
+  // Adjacent teeth — flat-sided blocks with a LOCALIZED bulge at contact height only.
+  // Block inner face sits adjBulge away from crown; bulge peak touches crown at slider=0.
+  const adjTopY = 160;
+  const adjContactY = 230;
+  const adjCervicalY = 325;
+  const adjWidth = 92;
+  const adjCorner = 14;
+  const adjBulge = 4;                                  // contact-zone bulge peak depth
+  const adjContactSpan = 22;                            // vertical half-span of contact bulge
+
+  // Left adjacent — inner face (right side) bulges only around adjContactY
+  const adjLeftX = outerLeft - adjBulge;               // flat inner-face X
+  const adjLeftOuter = adjLeftX - adjWidth;
+  const adjacentLeftPath = `
+    M ${adjLeftX} ${adjTopY + adjCorner}
+    Q ${adjLeftX} ${adjTopY}, ${adjLeftX - adjCorner} ${adjTopY}
+    L ${adjLeftOuter + adjCorner} ${adjTopY}
+    Q ${adjLeftOuter} ${adjTopY}, ${adjLeftOuter} ${adjTopY + adjCorner}
+    L ${adjLeftOuter} ${adjCervicalY - adjCorner}
+    Q ${adjLeftOuter} ${adjCervicalY}, ${adjLeftOuter + adjCorner} ${adjCervicalY}
+    L ${adjLeftX - adjCorner} ${adjCervicalY}
+    Q ${adjLeftX} ${adjCervicalY}, ${adjLeftX} ${adjCervicalY - adjCorner}
+    L ${adjLeftX} ${adjContactY + adjContactSpan}
+    Q ${adjLeftX + adjBulge} ${adjContactY}, ${adjLeftX} ${adjContactY - adjContactSpan}
+    L ${adjLeftX} ${adjTopY + adjCorner}
+    Z
+  `;
+  document.getElementById('adjacentLeft').setAttribute('d', adjacentLeftPath);
+
+  // Right adjacent — mirror
+  const adjRightX = outerRight + adjBulge;
+  const adjRightOuter = adjRightX + adjWidth;
+  const adjacentRightPath = `
+    M ${adjRightX} ${adjTopY + adjCorner}
+    Q ${adjRightX} ${adjTopY}, ${adjRightX + adjCorner} ${adjTopY}
+    L ${adjRightOuter - adjCorner} ${adjTopY}
+    Q ${adjRightOuter} ${adjTopY}, ${adjRightOuter} ${adjTopY + adjCorner}
+    L ${adjRightOuter} ${adjCervicalY - adjCorner}
+    Q ${adjRightOuter} ${adjCervicalY}, ${adjRightOuter - adjCorner} ${adjCervicalY}
+    L ${adjRightX + adjCorner} ${adjCervicalY}
+    Q ${adjRightX} ${adjCervicalY}, ${adjRightX} ${adjCervicalY - adjCorner}
+    L ${adjRightX} ${adjContactY + adjContactSpan}
+    Q ${adjRightX - adjBulge} ${adjContactY}, ${adjRightX} ${adjContactY - adjContactSpan}
+    L ${adjRightX} ${adjTopY + adjCorner}
+    Z
+  `;
+  document.getElementById('adjacentRight').setAttribute('d', adjacentRightPath);
+
+  document.getElementById('contactLabelR').setAttribute('x', adjRightX + 8);
+  document.getElementById('contactLabelR').setAttribute('y', adjContactY - 12);
+  document.getElementById('contactLabelR').textContent = 'コンタクト ' + formatValue('adjacentDistance', state.adjacentDistance) + 'mm';
+
+  // CAD-cut markers — visualise where CAD physically removed crown material.
+  // Shown only when slider is POSITIVE (= weak/no contact = CAD carved away).
+  // The crown silhouette itself already retracts via adjCut / biteCut above;
+  // these red marks just highlight the carved area so the user can see "CAD reduced here".
+  if (adjCut > 0) {
+    const leftCutX = outerLeft - 5 + adjCut;
+    const rightCutX = outerRight + 5 - adjCut;
+    const cutHalf = Math.min(14, 6 + adjCut * 0.6);
+    document.getElementById('contactPatchL').setAttribute('d', `
+      M ${leftCutX - 3} ${230 - cutHalf}
+      Q ${leftCutX + 4} ${230}, ${leftCutX - 3} ${230 + cutHalf}
+      Q ${leftCutX - 1} ${230}, ${leftCutX - 3} ${230 - cutHalf}
+      Z`);
+    document.getElementById('contactPatchR').setAttribute('d', `
+      M ${rightCutX + 3} ${230 - cutHalf}
+      Q ${rightCutX - 4} ${230}, ${rightCutX + 3} ${230 + cutHalf}
+      Q ${rightCutX + 1} ${230}, ${rightCutX + 3} ${230 - cutHalf}
+      Z`);
+    document.getElementById('contactPatchL').setAttribute('opacity', 0.75);
+    document.getElementById('contactPatchR').setAttribute('opacity', 0.75);
+  } else {
+    document.getElementById('contactPatchL').setAttribute('opacity', 0);
+    document.getElementById('contactPatchR').setAttribute('opacity', 0);
+  }
+
+  if (biteCut > 0) {
+    // Horizontal strip on top of the retracted crown edge → shows "CAD shaved here"
+    const topY = crownTopY + biteCut;
+    const thick = Math.min(8, 3 + biteCut * 0.3);
+    document.getElementById('contactPatchTop').setAttribute('d', `
+      M ${outerLeft + 24} ${topY - thick}
+      L ${outerRight - 24} ${topY - thick}
+      L ${outerRight - 24} ${topY + 1}
+      L ${outerLeft + 24} ${topY + 1}
+      Z`);
+    document.getElementById('contactPatchTop').setAttribute('opacity', 0.75);
+  } else {
+    document.getElementById('contactPatchTop').setAttribute('opacity', 0);
+  }
+
+  // Update ratings
+  updateRatings();
+}
+
+function updateRatings() {
+  // Fit
+  const fitRating = document.getElementById('fitRating');
+  const fitNote = document.getElementById('fitNote');
+  if (state.cementGap < 0.050) {
+    fitRating.textContent = 'きつめ';
+    fitRating.style.color = '#dc2626';
+    fitNote.textContent = '装着に時間かかる・脱離しにくい';
+  } else if (state.cementGap > 0.090) {
+    fitRating.textContent = 'ゆるめ';
+    fitRating.style.color = '#f59e0b';
+    fitNote.textContent = 'はめやすい・脱離リスクあり';
+  } else {
+    fitRating.textContent = '標準';
+    fitRating.style.color = '#10b981';
+    fitNote.textContent = '適切なフィット感';
+  }
+
+  // Bite
+  const biteRating = document.getElementById('biteRating');
+  const biteNote = document.getElementById('biteNote');
+  if (state.antagonistDistance < -0.03) {
+    biteRating.textContent = '接触あり';
+    biteRating.style.color = '#10b981';
+    biteNote.textContent = 'ABC接触・咬合機能確保';
+  } else if (state.antagonistDistance > 0.05) {
+    biteRating.textContent = '非接触';
+    biteRating.style.color = '#f59e0b';
+    biteNote.textContent = '咬合接触なし（NG等用途）';
+  } else {
+    biteRating.textContent = 'ギリ接触';
+    biteRating.style.color = '#3b82f6';
+    biteNote.textContent = '軽度接触';
+  }
+
+  // Contact
+  const contactRating = document.getElementById('contactRating');
+  const contactNote = document.getElementById('contactNote');
+  if (state.adjacentDistance < -0.07) {
+    contactRating.textContent = 'きつめ';
+    contactRating.style.color = '#dc2626';
+    contactNote.textContent = 'フロス通りにくい';
+  } else if (state.adjacentDistance > -0.02) {
+    contactRating.textContent = 'ゆるめ';
+    contactRating.style.color = '#f59e0b';
+    contactNote.textContent = '食片圧入リスク';
+  } else {
+    contactRating.textContent = '標準';
+    contactRating.style.color = '#10b981';
+    contactNote.textContent = 'フロス抵抗あり';
+  }
+
+  // Risk
+  const riskRating = document.getElementById('riskRating');
+  const riskNote = document.getElementById('riskNote');
+  let risks = [];
+  if (state.cementGap < 0.040) risks.push('装着不可');
+  if (state.cementGap > 0.100) risks.push('脱離');
+  if (state.antagonistDistance > 0.10) risks.push('咬合低下');
+  if (risks.length > 1) {
+    riskRating.textContent = '高';
+    riskRating.style.color = '#dc2626';
+    riskNote.textContent = risks.join(' / ');
+  } else if (risks.length === 1) {
+    riskRating.textContent = '中';
+    riskRating.style.color = '#f59e0b';
+    riskNote.textContent = risks.join(' / ');
+  } else {
+    riskRating.textContent = '低';
+    riskRating.style.color = '#10b981';
+    riskNote.textContent = '問題なし';
+  }
+}
+
+// Map each param to the SVG elements that should glow
+const HIGHLIGHT_MAP = {
+  cementGap:         ['primaryGapFill'],
+  extraCementGap:    ['extraGapFill'],
+  marginDistance:    ['primaryGapFill', 'extraGapFill', 'marginLineL', 'marginLineR', 'marginLabel'],
+  antagonistDistance:['crownOuter', 'contactPatchTop'],
+  adjacentDistance:  ['crownOuter', 'contactPatchL', 'contactPatchR'],
+  smoothingDistance: ['prepTooth'],
+  drillRadius:       ['prepTooth'],
+  drillOffset:       ['prepTooth']
+};
+
+let highlightTimer = null;
+function applyHighlight(param) {
+  document.querySelectorAll('.pulsing').forEach(el => el.classList.remove('pulsing'));
+  const ids = HIGHLIGHT_MAP[param];
+  if (!ids) return;
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('pulsing');
+  });
+  clearTimeout(highlightTimer);
+  highlightTimer = setTimeout(() => {
+    document.querySelectorAll('.pulsing').forEach(el => el.classList.remove('pulsing'));
+  }, 1800);
+}
+
+// Bind sliders
+Object.keys(state).forEach(param => {
+  const input = document.getElementById(param);
+  if (!input) return;
+  input.addEventListener('input', e => {
+    state[param] = parseFloat(e.target.value);
+    updateAllValues();
+    renderSvg();
+    applyHighlight(param);
+  });
+
+  // Hover to show explanation + preview the affected region
+  const row = input.closest('.slider-row');
+  row.addEventListener('mouseenter', () => { showExplain(param); applyHighlight(param); });
+  input.addEventListener('focus', () => { showExplain(param); applyHighlight(param); });
+  input.addEventListener('input', () => showExplain(param));
+});
+
+function showExplain(param) {
+  const info = EXPLAIN[param];
+  if (!info) return;
+  const panel = document.getElementById('explainPanel');
+  panel.innerHTML = `<h3>💡 ${info.title}</h3><p>${info.body}</p>`;
+  document.querySelectorAll('.slider-row').forEach(r => r.classList.remove('active'));
+  const activeRow = document.querySelector(`.slider-row[data-param="${param}"]`);
+  if (activeRow) activeRow.classList.add('active');
+}
+
+// Reset button
+document.getElementById('btnReset').addEventListener('click', () => {
+  Object.keys(DEFAULTS).forEach(k => {
+    state[k] = DEFAULTS[k];
+    const input = document.getElementById(k);
+    if (input) input.value = DEFAULTS[k];
+  });
+  updateAllValues();
+  renderSvg();
+});
+
+// Save button
+document.getElementById('btnSave').addEventListener('click', () => {
+  const output = document.getElementById('presetOutput');
+  const timestamp = new Date().toLocaleString('ja-JP');
+  const text = `Ceramica CADプリセット（${timestamp}保存）
+──────────────────────────
+【ダイインターフェース】
+  セメント間隙            ${formatValue('cementGap', state.cementGap)} mm
+  追加のセメント間隙      ${formatValue('extraCementGap', state.extraCementGap)} mm
+  マージンラインまでの距離 ${formatValue('marginDistance', state.marginDistance)} mm
+
+【接触】
+  対合歯までの所望距離     ${formatValue('antagonistDistance', state.antagonistDistance)} mm
+  隣在歯までの所望距離     ${formatValue('adjacentDistance', state.adjacentDistance)} mm
+
+【詳細】
+  スムージング距離        ${formatValue('smoothingDistance', state.smoothingDistance)} mm
+  ドリル半径              ${formatValue('drillRadius', state.drillRadius)} mm
+  ドリル補正オフセット     ${formatValue('drillOffset', state.drillOffset)} mm`;
+  output.textContent = text;
+  output.classList.add('show');
+
+  // Copy to clipboard
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      // optional: show toast
+    });
+  }
+});
+
+// Initial render
+updateAllValues();
+renderSvg();
+showExplain('cementGap');
+</script>
+
+</body>
+</html>
