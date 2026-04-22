@@ -465,19 +465,6 @@ details.advanced[open] summary {
         <div class="desc">下ゾーン（セメント間隙）と上ゾーン（追加のセメント間隙）の境界位置</div>
       </div>
 
-      <div class="slider-row" data-param="minWallThickness">
-        <div class="label-row">
-          <span class="label">最小壁厚<span id="thicknessBadge" class="thickness-badge green">🟢 推奨</span></span>
-          <span class="value"><span id="v-minWallThickness">1.00</span><span class="unit">mm</span></span>
-        </div>
-        <input type="range" id="minWallThickness" min="0.50" max="2.00" step="0.05" value="1.00">
-        <div class="desc thickness-zones" id="thicknessZones">
-          <span class="zone-red">🔴 &lt;0.6</span>
-          <span class="zone-yellow">🟡 0.6-1.0</span>
-          <span class="zone-green">🟢 ≥1.0mm</span>
-        </div>
-      </div>
-
       <h2 style="margin-top:14px;">📐 エマージェンシー形態</h2>
 
       <div class="slider-row" data-param="emergenceAngle">
@@ -739,10 +726,6 @@ const EXPLAIN = {
     title: 'ドリル補正オフセット',
     body: 'バーが届かない鋭角部分の補正量。大きすぎると適合悪化、小さすぎるとチッピング。'
   },
-  minWallThickness: {
-    title: '最小壁厚（Minimum Wall Thickness）',
-    body: '補綴物の最も薄い部分の厚み。材質ごとに破折リスクが異なる。<br><br><b>保険CAD/CAM冠（PMMA/ハイブリッド）</b>：理論1.0mm推奨（補綴歯科学会指針2024）。現場では形成不足で0.6mmまで追い込まれることも（🟡帯）。<br><b>ジルコニア（モノリシック）</b>：長期予後1.0mm以上推奨。0.5mm可（短期研究）だが非推奨（🟡帯）。<br><b>インプラント補綴</b>：軸壁1.2mm以上推奨（破折抵抗・Pjur-Sato 2024）。<br><br>🟢緑＝推奨 / 🟡黄＝許容（警告） / 🔴赤＝破折リスク大。'
-  },
   emergenceAngle: {
     title: 'エマージェンス角度（Emergence Angle）',
     body: '<b>歯肉縁下（プラットフォーム→歯肉縁）で軟組織を押している輪郭の傾き</b>。補綴物の長軸（垂直）に対する角度で測る。<br><br><b>小さい（緩やか・＜30°）</b>：サブジンジバル側が細く立ち上がる → 歯肉への圧迫少・血流維持・清掃性◎<br><b>大きい（急峻・＞30°）</b>：サブジンジバル側が太く広がる → 歯肉を外側に押し出す・退縮・プラーク停滞・炎症リスク↑<br><br><b>臨床標準値</b><br>・自然歯 前歯：27-30°<br>・自然歯 臼歯：36-39°<br>・<b>インプラント補綴：≦30°推奨</b>（＞30°で歯肉炎症・縁下骨吸収リスク顕著・Soulami 2022 systematic review）<br><br>インプラントでは特に重要——軟組織シール形成と長期予後を決定する要素。スライダーで歯肉縁下の輪郭が太く/細くなる様子を確認できる。'
@@ -755,7 +738,6 @@ const PRESETS = {
     cementGap: 0.040,
     extraCementGap: 0.050,
     marginDistance: 1.00,
-    minWallThickness: 1.00,
     emergenceAngle: 35,
     antagonistDistance: -0.05,
     adjacentDistance: -0.05,
@@ -767,7 +749,6 @@ const PRESETS = {
     cementGap: 0.040,       // 3Shape推奨値
     extraCementGap: 0.050,
     marginDistance: 1.00,
-    minWallThickness: 1.00, // 長期予後基準
     emergenceAngle: 32,
     antagonistDistance: -0.05,
     adjacentDistance: -0.05,
@@ -779,7 +760,6 @@ const PRESETS = {
     cementGap: 0.050,
     extraCementGap: 0.060,
     marginDistance: 1.50,
-    minWallThickness: 1.20, // 軸壁1.2mm推奨
     emergenceAngle: 28,     // 30°以下推奨
     antagonistDistance: -0.02,
     adjacentDistance: -0.03,
@@ -793,21 +773,18 @@ const PRESETS = {
 const MODE_INFO = {
   hoken: {
     title: '⚙️ 保険CAD/CAM冠 プリセット',
-    sub: 'PMMA・ハイブリッドレジン / 実運用帯0.6-1.0mm',
-    note: '💡 <b>保険診療指針2024準拠</b>。理論最小1.0mmだが形成事情で0.6mm前後まで追い込まれることも。セメント間隙は3Shape推奨40μm。',
-    thickZones: { green: 1.0, yellow: 0.6 },
+    sub: 'PMMA・ハイブリッドレジン',
+    note: '💡 <b>保険診療指針2024準拠</b>。セメント間隙は3Shape推奨40μm。最小壁厚は形成量に応じてラボ側で判断します。',
   },
   zirconia: {
     title: '⚙️ ジルコニア冠 プリセット',
     sub: 'モノリシックZR / 3Shape推奨セメント間隙40μm',
-    note: '💡 <b>長期予後は咬合面1.0mm以上推奨</b>。0.5mm可（短期研究）も推奨しない。マージン25μm＋咬合側50μmのハイブリッド適合も選択肢。',
-    thickZones: { green: 1.0, yellow: 0.5 },
+    note: '💡 <b>長期予後を重視した設計</b>。マージン25μm＋咬合側50μmのハイブリッド適合も選択肢。最小壁厚はラボ判断。',
   },
   implant: {
     title: '⚙️ インプラント補綴 プリセット',
-    sub: 'エマージェンシープロファイル重視 / 軸壁1.2mm以上',
-    note: '💡 <b>アバットメント形態は症例別・技工士判断</b>。ここではエマージェンス角度（≤30°推奨）と軸壁厚（≥1.2mm）を中心に設定。軟組織シール形成が長期予後を決める。',
-    thickZones: { green: 1.2, yellow: 0.8 },
+    sub: 'エマージェンシープロファイル重視',
+    note: '💡 <b>アバットメント形態は症例別・技工士判断</b>。ここではエマージェンス角度（≤30°推奨）を中心に設定。軟組織シール形成が長期予後を決める。',
   }
 };
 
@@ -834,25 +811,6 @@ function updateAllValues() {
     const el = document.getElementById('v-' + param);
     if (el) el.textContent = formatValue(param, state[param]);
   });
-  updateThicknessBadge();
-}
-
-function updateThicknessBadge() {
-  const badge = document.getElementById('thicknessBadge');
-  if (!badge) return;
-  const zones = MODE_INFO[currentMode].thickZones;
-  const v = state.minWallThickness;
-  badge.classList.remove('green', 'yellow', 'red');
-  if (v >= zones.green) {
-    badge.className = 'thickness-badge green';
-    badge.textContent = '🟢 推奨';
-  } else if (v >= zones.yellow) {
-    badge.className = 'thickness-badge yellow';
-    badge.textContent = '🟡 許容（警告）';
-  } else {
-    badge.className = 'thickness-badge red';
-    badge.textContent = '🔴 破折リスク';
-  }
 }
 
 function applyMode(mode) {
@@ -865,16 +823,6 @@ function applyMode(mode) {
   document.getElementById('headerTitle').textContent = info.title;
   document.getElementById('headerSub').textContent = info.sub;
   document.getElementById('modeNote').innerHTML = info.note;
-
-  // Update thickness-zones legend text
-  const zones = info.thickZones;
-  const zonesEl = document.getElementById('thicknessZones');
-  if (zonesEl) {
-    zonesEl.innerHTML =
-      `<span class="zone-red">🔴 &lt;${zones.yellow.toFixed(1)}</span>` +
-      ` <span class="zone-yellow">🟡 ${zones.yellow.toFixed(1)}-${zones.green.toFixed(1)}</span>` +
-      ` <span class="zone-green">🟢 ≥${zones.green.toFixed(1)}mm</span>`;
-  }
 
   // Sync all sliders with new state values
   Object.keys(state).forEach(param => {
@@ -1486,9 +1434,6 @@ document.getElementById('btnSave').addEventListener('click', () => {
   セメント間隙            ${formatValue('cementGap', state.cementGap)} mm
   追加のセメント間隙      ${formatValue('extraCementGap', state.extraCementGap)} mm
   マージンラインまでの距離 ${formatValue('marginDistance', state.marginDistance)} mm
-
-【最小壁厚】
-  最小壁厚               ${formatValue('minWallThickness', state.minWallThickness)} mm
 
 【エマージェンシー形態】
   エマージェンス角度      ${formatValue('emergenceAngle', state.emergenceAngle)} °
