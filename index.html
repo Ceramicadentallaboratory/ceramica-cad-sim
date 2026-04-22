@@ -599,24 +599,28 @@ details.advanced[open] summary {
 
           <!-- Implant group (shown only in implant mode) -->
           <g id="implantGroup" style="display:none;">
-            <!-- Gum line (soft tissue surface) -->
-            <path id="gumLine" d="" fill="#fca5a5" opacity="0.35" stroke="#f87171" stroke-width="1" stroke-dasharray="3,2"/>
-            <!-- Emergence profile highlight band -->
-            <path id="emergenceBandL" d="" fill="#10b981" opacity="0.22"/>
-            <path id="emergenceBandR" d="" fill="#10b981" opacity="0.22"/>
-            <!-- Abutment (connector between fixture and crown) -->
+            <!-- Gingival tissue bands (pressed by sub-gingival emergence profile) -->
+            <path id="gumTissueL" d="" fill="#fca5a5" opacity="0.5" stroke="#f87171" stroke-width="1"/>
+            <path id="gumTissueR" d="" fill="#fca5a5" opacity="0.5" stroke="#f87171" stroke-width="1"/>
+            <!-- Gingival margin line (where emergence emerges from tissue) -->
+            <line id="gumMarginL" x1="0" y1="0" x2="0" y2="0" stroke="#b91c1c" stroke-width="1.2" stroke-dasharray="3,2"/>
+            <line id="gumMarginR" x1="0" y1="0" x2="0" y2="0" stroke="#b91c1c" stroke-width="1.2" stroke-dasharray="3,2"/>
+            <!-- Abutment (connector — sub-gingival + supra-gingival) -->
             <path id="abutment" d="" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
-            <!-- Fixture (threaded implant body below gum line) -->
+            <!-- Emergence profile highlight (sub-gingival zone — the pressing surface) -->
+            <path id="emergenceZone" d="" fill="none" stroke="#059669" stroke-width="2" stroke-dasharray="5,3"/>
+            <!-- Fixture (implant body below platform) -->
             <path id="fixture" d="" fill="#64748b" stroke="#1e293b" stroke-width="1.5"/>
             <!-- Thread lines on fixture -->
             <g id="fixtureThreads" stroke="#1e293b" stroke-width="0.8" fill="none"></g>
             <!-- Screw access (vertical channel) -->
             <rect id="screwAccess" width="14" height="0" fill="#1e293b" opacity="0.25"/>
-            <!-- Emergence angle indicator line -->
-            <line id="emergenceAngleL" x1="0" y1="0" x2="0" y2="0" stroke="#059669" stroke-width="2" stroke-dasharray="4,3"/>
-            <line id="emergenceAngleR" x1="0" y1="0" x2="0" y2="0" stroke="#059669" stroke-width="2" stroke-dasharray="4,3"/>
+            <!-- Platform reference line -->
+            <line id="platformLine" x1="0" y1="0" x2="0" y2="0" stroke="#475569" stroke-width="1" stroke-dasharray="2,2"/>
+            <!-- Labels -->
             <text id="emergenceLabel" x="0" y="0" font-size="10" fill="#059669" font-weight="700">エマージェンス</text>
-            <text id="gumLabel" x="495" y="0" text-anchor="end" font-size="10" fill="#b91c1c" font-weight="700">歯肉縁</text>
+            <text id="gumLabel" x="560" y="0" text-anchor="end" font-size="10" fill="#b91c1c" font-weight="700">歯肉縁</text>
+            <text id="platformLabel" x="560" y="0" text-anchor="end" font-size="9" fill="#475569" font-weight="600">プラットフォーム</text>
           </g>
 
           <!-- CAD-cut markers — appear only when slider is positive (CAD removed material) -->
@@ -741,7 +745,7 @@ const EXPLAIN = {
   },
   emergenceAngle: {
     title: 'エマージェンス角度（Emergence Angle）',
-    body: '歯肉縁から補綴物外形への立ち上がり角度。軟組織への圧迫・プラーク停滞リスクを左右する。<br><br><b>小さい（緩やか）</b>：軟組織にやさしい・清掃性◎<br><b>大きい（急峻）</b>：大量フィラー・歯肉退縮やプラーク停滞のリスク↑<br><br><b>臨床標準値</b><br>・自然歯 前歯：27-30°<br>・自然歯 臼歯：36-39°<br>・<b>インプラント補綴：30°以下推奨</b>（＞30°で歯肉炎症・縁下骨吸収リスク顕著・systematic review 2022）<br><br>インプラントでは特に重要——軟組織シール形成と長期予後を決定する要素。'
+    body: '<b>歯肉縁下（プラットフォーム→歯肉縁）で軟組織を押している輪郭の傾き</b>。補綴物の長軸（垂直）に対する角度で測る。<br><br><b>小さい（緩やか・＜30°）</b>：サブジンジバル側が細く立ち上がる → 歯肉への圧迫少・血流維持・清掃性◎<br><b>大きい（急峻・＞30°）</b>：サブジンジバル側が太く広がる → 歯肉を外側に押し出す・退縮・プラーク停滞・炎症リスク↑<br><br><b>臨床標準値</b><br>・自然歯 前歯：27-30°<br>・自然歯 臼歯：36-39°<br>・<b>インプラント補綴：≦30°推奨</b>（＞30°で歯肉炎症・縁下骨吸収リスク顕著・Soulami 2022 systematic review）<br><br>インプラントでは特に重要——軟組織シール形成と長期予後を決定する要素。スライダーで歯肉縁下の輪郭が太く/細くなる様子を確認できる。'
   }
 };
 
@@ -1199,43 +1203,97 @@ function renderImplantOverlay(cx, crownTopY, crownBottomY, crownWidth, outerLeft
   marginLabel.style.display = 'none';
   implantGroup.style.display = '';
 
-  // Geometry constants for implant
-  const gumY = crownBottomY;                 // gum line ≈ crown bottom
-  const abutmentTopY = crownTopY + 30;       // abutment stops at crown inner base
-  const abutmentBottomY = gumY - 6;          // abutment base slightly above gum
-  const fixtureTopY = gumY + 4;              // fixture starts just below gum
-  const fixtureBottomY = gumY + 150;         // fixture extends ~ 3.75mm equivalent
-  const fixtureWidth = 58;
-  const abutmentTopW = 52;
-  const abutmentBottomW = 44;
+  // ── GEOMETRY ──────────────────────────────────────────────
+  // Vertical layout (top → bottom):
+  //   crownTopY (crown supra-gingival top)
+  //   gumY   ← gingival margin (surface of gum — where emergence "emerges")
+  //   platformY  ← implant platform (sub-gingival, 1-2mm below gum in reality)
+  //   fixtureApexY  ← implant body tip
+  // The SUB-gingival zone [gumY → platformY] is where the emergence profile
+  // presses against surrounding gum tissue. Wider angle = more tissue pressure.
 
-  // Gum line (horizontal band)
-  const gumPath = `
-    M 40 ${gumY}
-    L 560 ${gumY}
-    L 560 ${gumY + 8}
-    L 40 ${gumY + 8}
-    Z
-  `;
-  document.getElementById('gumLine').setAttribute('d', gumPath);
+  const gumY = crownBottomY;                // gingival margin
+  const subGingivalDepth = 48;              // ≈ 1.2mm sub-gingival (visual)
+  const platformY = gumY + subGingivalDepth;
+  const platformHalfW = 26;                 // implant platform half-width (narrow)
+  const fixtureApexY = platformY + 130;     // implant body tip
+  const fixtureHalfW = 28;                  // slightly wider than platform
 
-  // Abutment (tapered connector from crown inner to fixture top)
+  // Emergence angle → controls how wide the profile gets at the gum margin
+  // angle is measured from the long axis (vertical); tan(angle) × depth = extra flare half-width
+  const angleDeg = state.emergenceAngle;
+  const angleRad = angleDeg * Math.PI / 180;
+  const flareHalfW = Math.tan(angleRad) * subGingivalDepth;
+  const gumHalfW = platformHalfW + flareHalfW; // abutment/crown width at gum level
+
+  // Supra-gingival abutment above gum continues to crown inner base
+  const abutmentTopY = crownTopY + 30;
+  const abutmentTopHalfW = Math.max(gumHalfW, 22); // don't shrink above gum
+
+  // ── ABUTMENT (supra-gingival + sub-gingival as one shape) ─
+  // Sub-gingival trapezoid: narrow at platform → wider at gum (driven by angle)
+  // Supra-gingival: stays at gum width up to crown inner
   const abutmentPath = `
-    M ${cx - abutmentTopW/2} ${abutmentTopY}
-    L ${cx + abutmentTopW/2} ${abutmentTopY}
-    L ${cx + abutmentBottomW/2} ${abutmentBottomY}
-    L ${cx - abutmentBottomW/2} ${abutmentBottomY}
+    M ${cx - abutmentTopHalfW} ${abutmentTopY}
+    L ${cx + abutmentTopHalfW} ${abutmentTopY}
+    L ${cx + gumHalfW} ${gumY}
+    L ${cx + platformHalfW} ${platformY}
+    L ${cx - platformHalfW} ${platformY}
+    L ${cx - gumHalfW} ${gumY}
     Z
   `;
   document.getElementById('abutment').setAttribute('d', abutmentPath);
 
-  // Fixture (threaded screw-shaped body, rounded apex)
-  const fLeft = cx - fixtureWidth/2;
-  const fRight = cx + fixtureWidth/2;
-  const apex = fixtureBottomY;
+  // ── EMERGENCE ZONE HIGHLIGHT (sub-gingival pressing surface) ─
+  // Dashed green outline tracing the transmucosal profile on both sides
+  const emergencePath = `
+    M ${cx - platformHalfW} ${platformY}
+    L ${cx - gumHalfW} ${gumY}
+    M ${cx + platformHalfW} ${platformY}
+    L ${cx + gumHalfW} ${gumY}
+  `;
+  document.getElementById('emergenceZone').setAttribute('d', emergencePath);
+
+  // ── GUM TISSUE (pressed against sub-gingival profile) ─
+  // Two bands on left/right: outer edge at screen margin, inner edge follows flare
+  const tissueOuterL = 40;
+  const tissueOuterR = 560;
+  const gumTissueL = `
+    M ${tissueOuterL} ${gumY - 6}
+    L ${cx - gumHalfW - 2} ${gumY - 4}
+    L ${cx - gumHalfW - 2} ${gumY}
+    L ${cx - platformHalfW - 2} ${platformY}
+    L ${tissueOuterL} ${platformY + 2}
+    Z
+  `;
+  const gumTissueR = `
+    M ${tissueOuterR} ${gumY - 6}
+    L ${cx + gumHalfW + 2} ${gumY - 4}
+    L ${cx + gumHalfW + 2} ${gumY}
+    L ${cx + platformHalfW + 2} ${platformY}
+    L ${tissueOuterR} ${platformY + 2}
+    Z
+  `;
+  document.getElementById('gumTissueL').setAttribute('d', gumTissueL);
+  document.getElementById('gumTissueR').setAttribute('d', gumTissueR);
+
+  // ── GINGIVAL MARGIN LINES (dashed, where tissue meets restoration) ─
+  document.getElementById('gumMarginL').setAttribute('x1', tissueOuterL);
+  document.getElementById('gumMarginL').setAttribute('y1', gumY);
+  document.getElementById('gumMarginL').setAttribute('x2', cx - gumHalfW - 2);
+  document.getElementById('gumMarginL').setAttribute('y2', gumY);
+  document.getElementById('gumMarginR').setAttribute('x1', cx + gumHalfW + 2);
+  document.getElementById('gumMarginR').setAttribute('y1', gumY);
+  document.getElementById('gumMarginR').setAttribute('x2', tissueOuterR);
+  document.getElementById('gumMarginR').setAttribute('y2', gumY);
+
+  // ── FIXTURE (implant body below platform) ─
+  const fLeft = cx - fixtureHalfW;
+  const fRight = cx + fixtureHalfW;
+  const apex = fixtureApexY;
   const fixturePath = `
-    M ${fLeft} ${fixtureTopY}
-    L ${fRight} ${fixtureTopY}
+    M ${fLeft} ${platformY}
+    L ${fRight} ${platformY}
     L ${fRight} ${apex - 14}
     Q ${fRight} ${apex}, ${cx + 8} ${apex}
     L ${cx - 8} ${apex}
@@ -1244,11 +1302,11 @@ function renderImplantOverlay(cx, crownTopY, crownBottomY, crownWidth, outerLeft
   `;
   document.getElementById('fixture').setAttribute('d', fixturePath);
 
-  // Thread lines across fixture (horizontal slanted segments)
+  // Threads on fixture
   const threads = document.getElementById('fixtureThreads');
   threads.innerHTML = '';
-  const threadCount = 10;
-  const threadStart = fixtureTopY + 10;
+  const threadCount = 9;
+  const threadStart = platformY + 10;
   const threadEnd = apex - 18;
   const threadStep = (threadEnd - threadStart) / threadCount;
   for (let i = 0; i <= threadCount; i++) {
@@ -1257,56 +1315,26 @@ function renderImplantOverlay(cx, crownTopY, crownBottomY, crownWidth, outerLeft
     threads.innerHTML += `<line x1="${fLeft + inset}" y1="${y}" x2="${fRight - inset}" y2="${y + 3}"/>`;
   }
 
-  // Screw access channel (central vertical)
+  // Screw access channel
   const screwAccess = document.getElementById('screwAccess');
   screwAccess.setAttribute('x', cx - 7);
   screwAccess.setAttribute('y', crownTopY + 35);
-  screwAccess.setAttribute('height', abutmentBottomY - crownTopY - 35);
+  screwAccess.setAttribute('height', platformY - crownTopY - 35);
 
-  // Emergence angle visualization — lines from abutment top corners outward
-  // Angle measured from vertical: larger angle = more divergent (risky)
-  const angleDeg = state.emergenceAngle;
-  const angleRad = angleDeg * Math.PI / 180;
-  const emLen = 62;
-  const emStartY = abutmentTopY;
-  const emEndL_x = (cx - abutmentTopW/2) - Math.sin(angleRad) * emLen;
-  const emEndL_y = emStartY - Math.cos(angleRad) * emLen;
-  const emEndR_x = (cx + abutmentTopW/2) + Math.sin(angleRad) * emLen;
-  const emEndR_y = emStartY - Math.cos(angleRad) * emLen;
-  document.getElementById('emergenceAngleL').setAttribute('x1', cx - abutmentTopW/2);
-  document.getElementById('emergenceAngleL').setAttribute('y1', emStartY);
-  document.getElementById('emergenceAngleL').setAttribute('x2', emEndL_x);
-  document.getElementById('emergenceAngleL').setAttribute('y2', emEndL_y);
-  document.getElementById('emergenceAngleR').setAttribute('x1', cx + abutmentTopW/2);
-  document.getElementById('emergenceAngleR').setAttribute('y1', emStartY);
-  document.getElementById('emergenceAngleR').setAttribute('x2', emEndR_x);
-  document.getElementById('emergenceAngleR').setAttribute('y2', emEndR_y);
+  // Platform reference line (horizontal at platformY)
+  document.getElementById('platformLine').setAttribute('x1', 40);
+  document.getElementById('platformLine').setAttribute('y1', platformY);
+  document.getElementById('platformLine').setAttribute('x2', 560);
+  document.getElementById('platformLine').setAttribute('y2', platformY);
+
+  // Labels
   const emLbl = document.getElementById('emergenceLabel');
-  emLbl.setAttribute('x', emEndR_x + 4);
-  emLbl.setAttribute('y', emEndR_y - 2);
+  emLbl.setAttribute('x', cx + gumHalfW + 6);
+  emLbl.setAttribute('y', (gumY + platformY) / 2 + 3);
   emLbl.textContent = `エマージェンス ${Math.round(angleDeg)}°`;
 
-  // Emergence profile band (soft-tissue transition zone highlight)
-  const bandBottomY = gumY - 2;
-  const bandTopY = abutmentTopY - 4;
-  const bandInset = 6;
-  document.getElementById('emergenceBandL').setAttribute('d', `
-    M ${cx - abutmentTopW/2 - bandInset} ${bandTopY}
-    L ${cx - abutmentTopW/2 + 2} ${bandTopY}
-    L ${cx - abutmentBottomW/2 + 2} ${bandBottomY}
-    L ${cx - abutmentBottomW/2 - bandInset - 4} ${bandBottomY}
-    Z
-  `);
-  document.getElementById('emergenceBandR').setAttribute('d', `
-    M ${cx + abutmentTopW/2 + bandInset} ${bandTopY}
-    L ${cx + abutmentTopW/2 - 2} ${bandTopY}
-    L ${cx + abutmentBottomW/2 - 2} ${bandBottomY}
-    L ${cx + abutmentBottomW/2 + bandInset + 4} ${bandBottomY}
-    Z
-  `);
-
-  // Gum label position
-  document.getElementById('gumLabel').setAttribute('y', gumY - 3);
+  document.getElementById('gumLabel').setAttribute('y', gumY - 4);
+  document.getElementById('platformLabel').setAttribute('y', platformY + 12);
 }
 
 function updateRatings() {
