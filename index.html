@@ -496,20 +496,6 @@ details.advanced[open] summary {
         <div class="desc"><span class="tight">マイナス＝きついコンタクト</span> / <span class="loose">プラス＝ゆるいコンタクト</span></div>
       </div>
 
-      <details class="advanced">
-        <summary>▶ 高度な設定（スムージング・ドリル補正）</summary>
-
-        <div class="slider-row" data-param="smoothingDistance" style="margin-top:10px;">
-          <div class="label-row">
-            <span class="label">スムージング距離</span>
-            <span class="value"><span id="v-smoothingDistance">0.20</span><span class="unit">mm</span></span>
-          </div>
-          <input type="range" id="smoothingDistance" min="0.05" max="0.50" step="0.01" value="0.20">
-          <div class="desc">内面スムージングの範囲・大きいほど滑らか</div>
-        </div>
-
-      </details>
-
       <div class="actions">
         <button class="btn btn-secondary" id="btnReset">デフォルトに戻す</button>
         <button class="btn btn-primary" id="btnSave">プリセット保存</button>
@@ -697,10 +683,6 @@ const EXPLAIN = {
     title: '隣在歯までの所望距離（Desired Distance to Adjacent）',
     body: '冠と隣接歯との距離。コンタクトの強さを決定。<br><br><b>マイナス値（-0.08mm）</b>：きついコンタクト（フロス通りにくい・院長の好み）<br><b>-0.05mm</b>：標準（フロス抵抗あり）<br><b>ゼロ（0mm）</b>：軽く接触<br><b>プラス値</b>：離開（ブリッジポンティック等以外は非推奨）<br><br>臨床標準：-0.05 ~ -0.03mm。'
   },
-  smoothingDistance: {
-    title: 'スムージング距離',
-    body: '内面のスムージング処理範囲。大きいほど内面が滑らか、小さいほどスキャンデータに忠実。通常0.2mm標準。'
-  },
   emergenceAngle: {
     title: 'エマージェンス角度（Emergence Angle）',
     body: '<b>歯肉縁下（プラットフォーム→歯肉縁）で軟組織を押している輪郭の傾き</b>。補綴物の長軸（垂直）に対する角度で測る。<br><br><b>小さい（緩やか・＜30°）</b>：サブジンジバル側が細く立ち上がる → 歯肉への圧迫少・血流維持・清掃性◎<br><b>大きい（急峻・＞30°）</b>：サブジンジバル側が太く広がる → 歯肉を外側に押し出す・退縮・プラーク停滞・炎症リスク↑<br><br><b>臨床標準値</b><br>・自然歯 前歯：27-30°<br>・自然歯 臼歯：36-39°<br>・<b>インプラント補綴：≦30°推奨</b>（＞30°で歯肉炎症・縁下骨吸収リスク顕著・Soulami 2022 systematic review）<br><br>インプラントでは特に重要——軟組織シール形成と長期予後を決定する要素。スライダーで歯肉縁下の輪郭が太く/細くなる様子を確認できる。'
@@ -716,7 +698,6 @@ const PRESETS = {
     emergenceAngle: 35,
     antagonistDistance: -0.05,
     adjacentDistance: -0.05,
-    smoothingDistance: 0.20,
   },
   zirconia: {
     cementGap: 0.040,       // 3Shape推奨値
@@ -725,7 +706,6 @@ const PRESETS = {
     emergenceAngle: 32,
     antagonistDistance: -0.05,
     adjacentDistance: -0.05,
-    smoothingDistance: 0.20,
   },
   implant: {
     cementGap: 0.050,
@@ -734,7 +714,6 @@ const PRESETS = {
     emergenceAngle: 28,     // 30°以下推奨
     antagonistDistance: -0.02,
     adjacentDistance: -0.03,
-    smoothingDistance: 0.20,
   }
 };
 
@@ -1333,8 +1312,7 @@ const HIGHLIGHT_MAP = {
   extraCementGap:    ['extraGapFill'],
   marginDistance:    ['primaryGapFill', 'extraGapFill', 'marginLineL', 'marginLineR', 'marginLabel'],
   antagonistDistance:['crownOuter', 'contactPatchTop'],
-  adjacentDistance:  ['crownOuter', 'contactPatchL', 'contactPatchR'],
-  smoothingDistance: ['prepTooth']
+  adjacentDistance:  ['crownOuter', 'contactPatchL', 'contactPatchR']
 };
 
 let highlightTimer = null;
@@ -1406,10 +1384,7 @@ document.getElementById('btnSave').addEventListener('click', () => {
 
 【接触】
   対合歯までの所望距離     ${formatValue('antagonistDistance', state.antagonistDistance)} mm
-  隣在歯までの所望距離     ${formatValue('adjacentDistance', state.adjacentDistance)} mm
-
-【詳細】
-  スムージング距離        ${formatValue('smoothingDistance', state.smoothingDistance)} mm`;
+  隣在歯までの所望距離     ${formatValue('adjacentDistance', state.adjacentDistance)} mm`;
   output.textContent = text;
   output.classList.add('show');
 
