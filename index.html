@@ -867,15 +867,28 @@ function renderSvg() {
   // Top moves with biteOffset (+ retreat / − dig into opposing);
   // sides move with adjOffset  (+ retreat / − dig into adjacent).
   const crownTopEdge = crownTopY + biteOffset;
+
+  // Implant mode: crown bottom margin aligns with emergence gum-level width.
+  // Angle widens sub-gingival flare → crown bottom widens to match.
+  let crownBottomLeftX = outerLeft;
+  let crownBottomRightX = outerRight;
+  if (currentMode === 'implant') {
+    const _platformHalfW = 26;
+    const _subGingivalDepth = 48;
+    const _gumHalfW = _platformHalfW + Math.tan(state.emergenceAngle * Math.PI / 180) * _subGingivalDepth;
+    crownBottomLeftX = cx - _gumHalfW;
+    crownBottomRightX = cx + _gumHalfW;
+  }
+
   const crownPath = `
-    M ${outerLeft} ${crownBottomY}
-    L ${outerLeft - 4 + adjOffset} ${crownBottomY - 20}
+    M ${crownBottomLeftX} ${crownBottomY}
+    L ${crownBottomLeftX - 4 + adjOffset} ${crownBottomY - 20}
     L ${outerLeft + 4 + adjOffset} ${crownTopEdge + 28}
     Q ${outerLeft + 8 + adjOffset} ${crownTopEdge + 6}, ${outerLeft + 22 + adjOffset * 0.4} ${crownTopEdge}
     L ${outerRight - 22 - adjOffset * 0.4} ${crownTopEdge}
     Q ${outerRight - 8 - adjOffset} ${crownTopEdge + 6}, ${outerRight - 4 - adjOffset} ${crownTopEdge + 28}
-    L ${outerRight + 4 - adjOffset} ${crownBottomY - 20}
-    L ${outerRight} ${crownBottomY}
+    L ${crownBottomRightX + 4 - adjOffset} ${crownBottomY - 20}
+    L ${crownBottomRightX} ${crownBottomY}
     Z
   `;
   document.getElementById('crownOuter').setAttribute('d', crownPath);
