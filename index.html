@@ -1275,11 +1275,11 @@ function updateRatings() {
     fitNote.textContent = '装着に時間かかる・脱離しにくい';
   } else if (state.cementGap > 0.090) {
     fitRating.textContent = 'ゆるめ';
-    fitRating.style.color = '#f59e0b';
+    fitRating.style.color = '#b45309';
     fitNote.textContent = 'はめやすい・脱離リスクあり';
   } else {
     fitRating.textContent = '標準';
-    fitRating.style.color = '#10b981';
+    fitRating.style.color = '#047857';
     fitNote.textContent = '適切なフィット感';
   }
 
@@ -1288,15 +1288,15 @@ function updateRatings() {
   const biteNote = document.getElementById('biteNote');
   if (state.antagonistDistance < -0.03) {
     biteRating.textContent = '接触あり';
-    biteRating.style.color = '#10b981';
+    biteRating.style.color = '#047857';
     biteNote.textContent = 'ABC接触・咬合機能確保';
   } else if (state.antagonistDistance > 0.05) {
     biteRating.textContent = '非接触';
-    biteRating.style.color = '#f59e0b';
+    biteRating.style.color = '#b45309';
     biteNote.textContent = '咬合接触なし（NG等用途）';
   } else {
     biteRating.textContent = 'ギリ接触';
-    biteRating.style.color = '#3b82f6';
+    biteRating.style.color = '#1d4ed8';
     biteNote.textContent = '軽度接触';
   }
 
@@ -1309,11 +1309,11 @@ function updateRatings() {
     contactNote.textContent = 'フロス通りにくい';
   } else if (state.adjacentDistance > -0.02) {
     contactRating.textContent = 'ゆるめ';
-    contactRating.style.color = '#f59e0b';
+    contactRating.style.color = '#b45309';
     contactNote.textContent = '食片圧入リスク';
   } else {
     contactRating.textContent = '標準';
-    contactRating.style.color = '#10b981';
+    contactRating.style.color = '#047857';
     contactNote.textContent = 'フロス抵抗あり';
   }
 
@@ -1330,11 +1330,11 @@ function updateRatings() {
     riskNote.textContent = risks.join(' / ');
   } else if (risks.length === 1) {
     riskRating.textContent = '中';
-    riskRating.style.color = '#f59e0b';
+    riskRating.style.color = '#b45309';
     riskNote.textContent = risks.join(' / ');
   } else {
     riskRating.textContent = '低';
-    riskRating.style.color = '#10b981';
+    riskRating.style.color = '#047857';
     riskNote.textContent = '問題なし';
   }
 }
