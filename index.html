@@ -868,26 +868,35 @@ function renderSvg() {
   // sides move with adjOffset  (+ retreat / − dig into adjacent).
   const crownTopEdge = crownTopY + biteOffset;
 
-  // Implant mode: crown bottom margin aligns with emergence gum-level width.
-  // Angle widens sub-gingival flare → crown bottom widens to match.
+  // Implant mode: crown bottom fully tracks the metal abutment contour.
+  // Bottom (at gum) = gumHalfW; 20px up = interpolated abutment width;
+  // so the crown margin hugs the metal as it tapers from gum → top.
   let crownBottomLeftX = outerLeft;
   let crownBottomRightX = outerRight;
+  let crownLeft20X = outerLeft - 4 + adjOffset;
+  let crownRight20X = outerRight + 4 - adjOffset;
   if (currentMode === 'implant') {
     const _platformHalfW = 26;
     const _subGingivalDepth = 48;
+    const _abutmentTopHalfW = 28;
     const _gumHalfW = _platformHalfW + Math.tan(state.emergenceAngle * Math.PI / 180) * _subGingivalDepth;
+    // Abutment supra-gingival linear taper: gum(gumHalfW) → top(28) over (gumY→abutmentTopY)
+    // gumY = crownBottomY = 340, abutmentTopY = crownTopY + 30 = 160, range = 180
+    const _abutmentHalfWAt20Up = _gumHalfW - (_gumHalfW - _abutmentTopHalfW) * (20 / 180);
     crownBottomLeftX = cx - _gumHalfW;
     crownBottomRightX = cx + _gumHalfW;
+    crownLeft20X = cx - _abutmentHalfWAt20Up + adjOffset;
+    crownRight20X = cx + _abutmentHalfWAt20Up - adjOffset;
   }
 
   const crownPath = `
     M ${crownBottomLeftX} ${crownBottomY}
-    L ${crownBottomLeftX - 4 + adjOffset} ${crownBottomY - 20}
+    L ${crownLeft20X} ${crownBottomY - 20}
     L ${outerLeft + 4 + adjOffset} ${crownTopEdge + 28}
     Q ${outerLeft + 8 + adjOffset} ${crownTopEdge + 6}, ${outerLeft + 22 + adjOffset * 0.4} ${crownTopEdge}
     L ${outerRight - 22 - adjOffset * 0.4} ${crownTopEdge}
     Q ${outerRight - 8 - adjOffset} ${crownTopEdge + 6}, ${outerRight - 4 - adjOffset} ${crownTopEdge + 28}
-    L ${crownBottomRightX + 4 - adjOffset} ${crownBottomY - 20}
+    L ${crownRight20X} ${crownBottomY - 20}
     L ${crownBottomRightX} ${crownBottomY}
     Z
   `;
