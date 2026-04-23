@@ -465,6 +465,28 @@ details.advanced[open] summary {
     <div class="panel">
       <h2>🎛️ ダイインターフェース > 詳細設定</h2>
 
+      <h2 style="margin-top:0;">🔧 咬合・接触</h2>
+
+      <div class="slider-row" data-param="antagonistDistance">
+        <div class="label-row">
+          <span class="label">対合歯までの所望距離（バイト）</span>
+          <span class="value"><span id="v-antagonistDistance">-0.05</span><span class="unit">mm</span></span>
+        </div>
+        <input type="range" id="antagonistDistance" aria-label="対合歯までの所望距離" min="-0.10" max="0.20" step="0.01" value="-0.05">
+        <div class="desc"><span class="tight">マイナス＝対合と接触</span>（咬合接触あり） / <span class="loose">プラス＝離す</span>（咬合なし・調整時間↓）</div>
+      </div>
+
+      <div class="slider-row" data-param="adjacentDistance">
+        <div class="label-row">
+          <span class="label">隣在歯までの所望距離（コンタクト）</span>
+          <span class="value"><span id="v-adjacentDistance">-0.05</span><span class="unit">mm</span></span>
+        </div>
+        <input type="range" id="adjacentDistance" aria-label="隣在歯までの所望距離" min="-0.10" max="0.10" step="0.01" value="-0.05">
+        <div class="desc"><span class="tight">マイナス＝きついコンタクト</span> / <span class="loose">プラス＝ゆるいコンタクト</span></div>
+      </div>
+
+      <h2 style="margin-top:14px;">🧱 内面適合・セメント</h2>
+
       <div class="slider-row" data-param="cementGap">
         <div class="label-row">
           <span class="label">セメント間隙</span>
@@ -503,26 +525,6 @@ details.advanced[open] summary {
           <input type="range" id="emergenceAngle" aria-label="エマージェンス角度" min="15" max="50" step="1" value="35">
           <div class="desc"><span class="tight">小さい＝緩やか</span>（軟組織優しい） / <span class="loose">大きい＝急峻</span>（プラーク停滞リスク↑）</div>
         </div>
-      </div>
-
-      <h2 style="margin-top:14px;">🔧 接触</h2>
-
-      <div class="slider-row" data-param="antagonistDistance">
-        <div class="label-row">
-          <span class="label">対合歯までの所望距離</span>
-          <span class="value"><span id="v-antagonistDistance">-0.05</span><span class="unit">mm</span></span>
-        </div>
-        <input type="range" id="antagonistDistance" aria-label="対合歯までの所望距離" min="-0.10" max="0.20" step="0.01" value="-0.05">
-        <div class="desc"><span class="tight">マイナス＝対合と接触</span>（咬合接触あり） / <span class="loose">プラス＝離す</span>（咬合なし・調整時間↓）</div>
-      </div>
-
-      <div class="slider-row" data-param="adjacentDistance">
-        <div class="label-row">
-          <span class="label">隣在歯までの所望距離</span>
-          <span class="value"><span id="v-adjacentDistance">-0.05</span><span class="unit">mm</span></span>
-        </div>
-        <input type="range" id="adjacentDistance" aria-label="隣在歯までの所望距離" min="-0.10" max="0.10" step="0.01" value="-0.05">
-        <div class="desc"><span class="tight">マイナス＝きついコンタクト</span> / <span class="loose">プラス＝ゆるいコンタクト</span></div>
       </div>
 
       <div class="actions">
@@ -1155,8 +1157,10 @@ function renderImplantOverlay(cx, crownTopY, crownBottomY, crownWidth, outerLeft
   const gumHalfW = platformHalfW + flareHalfW; // abutment/crown width at gum level
 
   // Supra-gingival abutment above gum continues to crown inner base
+  // FIXED width — angle only affects sub-gingival flare (platform→gum),
+  // supra-gingival shape stays constant as designed.
   const abutmentTopY = crownTopY + 30;
-  const abutmentTopHalfW = Math.max(gumHalfW, 22); // don't shrink above gum
+  const abutmentTopHalfW = 28;
 
   // ── ABUTMENT (supra-gingival + sub-gingival as one shape) ─
   // Sub-gingival trapezoid: narrow at platform → wider at gum (driven by angle)
