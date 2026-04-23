@@ -868,10 +868,11 @@ function renderSvg() {
   // sides move with adjOffset  (+ retreat / − dig into adjacent).
   const crownTopEdge = crownTopY + biteOffset;
 
-  // Implant mode: crown margin narrows to the abutment metal (gumHalfW),
-  // but the side silhouette bulges outward through the contact height
-  // (tulip shape) so adjacent contact still works at adjacentDistance=0.
-  let implantMode = (currentMode === 'implant');
+  // All modes: tulip silhouette via quadratic Bezier.
+  // Margin (bottom) → belly (widest, contact height) → occlusal top.
+  // Implant mode: margin narrows to metal (gumHalfW).
+  // Non-implant: margin at natural CEJ width; belly slightly outside for tooth-like convexity.
+  const implantMode = (currentMode === 'implant');
   let crownBottomLeftX = outerLeft;
   let crownBottomRightX = outerRight;
   if (implantMode) {
@@ -882,33 +883,22 @@ function renderSvg() {
     crownBottomRightX = cx + _gumHalfW;
   }
 
-  // Tulip-bulge control points for implant mode:
-  // the side goes from narrow margin → wide contact belly → occlusal
-  const bellyY = crownBottomY - 70;           // contact height (widest belly)
-  const bellyLeftX  = outerLeft  - 4 + adjOffset;
+  const bellyY = crownBottomY - 70;                    // contact height
+  const bellyLeftX  = outerLeft  - 4 + adjOffset;      // widest belly
   const bellyRightX = outerRight + 4 - adjOffset;
-  // Bezier tangent control pulling the curve outward from the narrow margin
-  const cervCtrlY = crownBottomY - 30;
-  const bellyCtrlY = bellyY + 22;
+  // Quadratic Bezier control at belly's X, midway up → curve rises monotonically
+  // from the margin to the belly without overshoot below the contact.
+  const cervCtrlY = crownBottomY - 32;
 
-  const crownPath = implantMode ? `
+  const crownPath = `
     M ${crownBottomLeftX} ${crownBottomY}
-    C ${crownBottomLeftX - 2} ${cervCtrlY}, ${bellyLeftX} ${bellyCtrlY}, ${bellyLeftX} ${bellyY}
+    Q ${bellyLeftX} ${cervCtrlY}, ${bellyLeftX} ${bellyY}
     L ${outerLeft + 4 + adjOffset} ${crownTopEdge + 28}
     Q ${outerLeft + 8 + adjOffset} ${crownTopEdge + 6}, ${outerLeft + 22 + adjOffset * 0.4} ${crownTopEdge}
     L ${outerRight - 22 - adjOffset * 0.4} ${crownTopEdge}
     Q ${outerRight - 8 - adjOffset} ${crownTopEdge + 6}, ${outerRight - 4 - adjOffset} ${crownTopEdge + 28}
     L ${bellyRightX} ${bellyY}
-    C ${bellyRightX} ${bellyCtrlY}, ${crownBottomRightX + 2} ${cervCtrlY}, ${crownBottomRightX} ${crownBottomY}
-  ` : `
-    M ${crownBottomLeftX} ${crownBottomY}
-    L ${outerLeft - 4 + adjOffset} ${crownBottomY - 20}
-    L ${outerLeft + 4 + adjOffset} ${crownTopEdge + 28}
-    Q ${outerLeft + 8 + adjOffset} ${crownTopEdge + 6}, ${outerLeft + 22 + adjOffset * 0.4} ${crownTopEdge}
-    L ${outerRight - 22 - adjOffset * 0.4} ${crownTopEdge}
-    Q ${outerRight - 8 - adjOffset} ${crownTopEdge + 6}, ${outerRight - 4 - adjOffset} ${crownTopEdge + 28}
-    L ${outerRight + 4 - adjOffset} ${crownBottomY - 20}
-    L ${crownBottomRightX} ${crownBottomY}
+    Q ${bellyRightX} ${cervCtrlY}, ${crownBottomRightX} ${crownBottomY}
     Z
   `;
   document.getElementById('crownOuter').setAttribute('d', crownPath);
