@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="歯科CADのセメント間隙・コンタクト・エマージェンス角度を院長先生と共有するインタラクティブシミュレーター。保険CAD冠・ジルコニア・インプラントの3モードに対応。｜セラミカデンタルラボラトリー（北海道帯広市）">
 <title>CADプリセットシミュレーター | Ceramica Dental Laboratory</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -17,6 +18,8 @@
   --text: #1a1a1a;
   --text-light: #666;
   --border: #e2e8f0;
+  --warn-text: #b45309;
+  --danger-text: #b91c1c;
   --gap-primary: #3b82f6;
   --gap-extra: #1d4ed8;
   --gap-bite: #f59e0b;
@@ -247,11 +250,11 @@ body {
   line-height: 1.5;
 }
 .slider-row .desc .tight {
-  color: var(--danger);
+  color: var(--danger-text);
   font-weight: 600;
 }
 .slider-row .desc .loose {
-  color: var(--warn);
+  color: var(--warn-text);
   font-weight: 600;
 }
 .slider-row.active {
@@ -435,7 +438,7 @@ details.advanced[open] summary {
 </style>
 </head>
 <body>
-<div class="container">
+<main class="container">
 
   <div class="header">
     <div>
@@ -467,7 +470,7 @@ details.advanced[open] summary {
           <span class="label">セメント間隙</span>
           <span class="value"><span id="v-cementGap">0.040</span><span class="unit">mm</span></span>
         </div>
-        <input type="range" id="cementGap" min="0.030" max="0.120" step="0.005" value="0.040">
+        <input type="range" id="cementGap" aria-label="セメント間隙" min="0.030" max="0.120" step="0.005" value="0.040">
         <div class="desc"><span class="tight">下げる＝きつい</span>（脱離しにくい・調整時間↑） / <span class="loose">上げる＝ゆるい</span>（はめやすい・脱離リスク↑）</div>
       </div>
 
@@ -476,7 +479,7 @@ details.advanced[open] summary {
           <span class="label">追加のセメント間隙</span>
           <span class="value"><span id="v-extraCementGap">0.050</span><span class="unit">mm</span></span>
         </div>
-        <input type="range" id="extraCementGap" min="0.030" max="0.150" step="0.005" value="0.050">
+        <input type="range" id="extraCementGap" aria-label="追加のセメント間隙" min="0.030" max="0.150" step="0.005" value="0.050">
         <div class="desc">マージンラインから上部の領域に適用される間隙。セメント逃げ道を確保</div>
       </div>
 
@@ -485,7 +488,7 @@ details.advanced[open] summary {
           <span class="label">マージンラインまでの距離</span>
           <span class="value"><span id="v-marginDistance">1.00</span><span class="unit">mm</span></span>
         </div>
-        <input type="range" id="marginDistance" min="0.50" max="2.00" step="0.05" value="1.00">
+        <input type="range" id="marginDistance" aria-label="マージンラインまでの距離" min="0.50" max="2.00" step="0.05" value="1.00">
         <div class="desc">下ゾーン（セメント間隙）と上ゾーン（追加のセメント間隙）の境界位置</div>
       </div>
 
@@ -497,7 +500,7 @@ details.advanced[open] summary {
             <span class="label">エマージェンス角度</span>
             <span class="value"><span id="v-emergenceAngle">35</span><span class="unit">°</span></span>
           </div>
-          <input type="range" id="emergenceAngle" min="15" max="50" step="1" value="35">
+          <input type="range" id="emergenceAngle" aria-label="エマージェンス角度" min="15" max="50" step="1" value="35">
           <div class="desc"><span class="tight">小さい＝緩やか</span>（軟組織優しい） / <span class="loose">大きい＝急峻</span>（プラーク停滞リスク↑）</div>
         </div>
       </div>
@@ -509,7 +512,7 @@ details.advanced[open] summary {
           <span class="label">対合歯までの所望距離</span>
           <span class="value"><span id="v-antagonistDistance">-0.05</span><span class="unit">mm</span></span>
         </div>
-        <input type="range" id="antagonistDistance" min="-0.10" max="0.20" step="0.01" value="-0.05">
+        <input type="range" id="antagonistDistance" aria-label="対合歯までの所望距離" min="-0.10" max="0.20" step="0.01" value="-0.05">
         <div class="desc"><span class="tight">マイナス＝対合と接触</span>（咬合接触あり） / <span class="loose">プラス＝離す</span>（咬合なし・調整時間↓）</div>
       </div>
 
@@ -518,7 +521,7 @@ details.advanced[open] summary {
           <span class="label">隣在歯までの所望距離</span>
           <span class="value"><span id="v-adjacentDistance">-0.05</span><span class="unit">mm</span></span>
         </div>
-        <input type="range" id="adjacentDistance" min="-0.10" max="0.10" step="0.01" value="-0.05">
+        <input type="range" id="adjacentDistance" aria-label="隣在歯までの所望距離" min="-0.10" max="0.10" step="0.01" value="-0.05">
         <div class="desc"><span class="tight">マイナス＝きついコンタクト</span> / <span class="loose">プラス＝ゆるいコンタクト</span></div>
       </div>
 
@@ -685,7 +688,7 @@ details.advanced[open] summary {
     090-6998-8023 ・ https://ceramica-dental.com
   </div>
 
-</div>
+</main>
 
 <script>
 const EXPLAIN = {
