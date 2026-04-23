@@ -1,0 +1,13 @@
+{
+  "mode": "hoken",
+  "values": {
+    "cementGap": 0.040,
+    "extraCementGap": 0.050,
+    "marginDistance": 1.00,
+    "antagonistDistance": -0.05,
+    "adjacentDistance": -0.05,
+    "emergenceAngle": 35
+  },
+  "lastUpdated": "2026-04-24",
+  "updatedBy": "Ceramica Lab"
+}
