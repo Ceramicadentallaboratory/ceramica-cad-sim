@@ -883,12 +883,12 @@ function renderSvg() {
     crownBottomRightX = cx + _gumHalfW;
   }
 
-  const bellyY = crownBottomY - 70;                    // contact height
-  const bellyLeftX  = outerLeft  - 4 + adjOffset;      // widest belly
-  const bellyRightX = outerRight + 4 - adjOffset;
+  const bellyY = crownBottomY - 110;                   // contact height (middle/upper-middle)
+  const bellyLeftX  = outerLeft  - 8 + adjOffset;      // widest belly — clearly outward
+  const bellyRightX = outerRight + 8 - adjOffset;
   // Quadratic Bezier control at belly's X, midway up → curve rises monotonically
   // from the margin to the belly without overshoot below the contact.
-  const cervCtrlY = crownBottomY - 32;
+  const cervCtrlY = crownBottomY - 50;
 
   const crownPath = `
     M ${crownBottomLeftX} ${crownBottomY}
